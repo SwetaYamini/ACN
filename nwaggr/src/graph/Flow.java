@@ -88,10 +88,12 @@ public class Flow implements Comparable<Flow> {
 	}
 	
 	public String toString(){
-		String ret="empty:" + empty + " len: "+len +" ";
+		if(empty==1) return "[empty]";
+		String ret="[";
 		for(int i=0;i<this.len;i++){
 			ret+=ips[i];
 		}
+		ret+="]";
 		return ret;
 	}
 

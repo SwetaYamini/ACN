@@ -9,11 +9,23 @@ public class Main {
 		Edge edge2 =graph.addEdge(2, 2);
 		Edge edge3 =graph.addEdge(1, 3);
 		graph.addEdge(2, 3);
+		Edge edge4 = graph.addEdge(1, 4);
 		
 		Flow flow = new Flow();
 		flow.empty=0;
 		flow.edgeIn=edge1;
 		flow.edgeOut = edge3;
+		flow.len=1;
+		flow.ips[0]=0;
+		flow.priority=1;
+		node1.addFlow(flow);
+		
+		flow = new Flow();
+		flow.empty=0;
+		flow.edgeIn=edge1;
+		flow.edgeOut = edge4;
+		flow.len=1;
+		flow.ips[0]=1;
 		flow.priority=1;
 		node1.addFlow(flow);
 		

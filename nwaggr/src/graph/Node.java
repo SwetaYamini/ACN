@@ -53,37 +53,39 @@ public class Node extends PathElement {
 		ArrayList<PathElement> path = new ArrayList<PathElement>();
 		path.add(this);		
 		Edge edgeOut = this.edges.values().iterator().next();		
-		if(edgeOut!=null){
-			System.out.println(edgeOut);
-		}
+		
 		path.add(edgeOut);
 		createFlowGraph(edgeOut.node1, edgeOut, completeflow, path);
 	}
 	
 	public void createFlowGraph(Node node, Edge edgeIn, Flow flow, ArrayList<PathElement> path){
-		System.out.println("CreateGraphFlow: " +node + " " + edgeIn);
+		//System.out.println("CreateGraphFlow: " +node + " " + edgeIn);
 		if(node.type==Configuration.EXTERNALNODE){
 			path.add(node);
-			flowpaths.put(flow, path);
+			ArrayList<PathElement> pathcopy = new ArrayList<PathElement>(path);
+			flowpaths.put(flow, pathcopy);
 			path.remove(path.size()-1);
 			return;
 		}
-		ArrayList<Flow> flows = node.flowtable.get(edgeIn);
-		Collections.sort(flows);
 		path.add(node);
-		for(int i=flows.size()-1;i>=0;i--){
-			//System.out.println("");
-			Flow overlap = flow.overlap(flows.get(i));
-			if(overlap.empty==1) continue;
-			Edge edgeOut = flows.get(i).edgeOut;
-			path.add(edgeOut);
-			createFlowGraph(edgeOut.getOtherNode(node), edgeOut, overlap, path);
-			flow.subtract(overlap);
-			path.remove(path.size()-1);
-			//if(flow.empty==1) break;
+		ArrayList<Flow> flows = node.flowtable.get(edgeIn);
+		if(flows!=null){
+			Collections.sort(flows);
+			for(int i=flows.size()-1;i>=0;i--){
+				//System.out.println("");
+				Flow overlap = flow.overlap(flows.get(i));
+				if(overlap.empty==1) continue;
+				Edge edgeOut = flows.get(i).edgeOut;
+				path.add(edgeOut);
+				createFlowGraph(edgeOut.getOtherNode(node), edgeOut, overlap, path);
+				flow.subtract(overlap);
+				path.remove(path.size()-1);
+				//if(flow.empty==1) break;
+			}
 		}
 		if(flow.empty!=1){
-			flowpaths.put(flow, path);
+			ArrayList<PathElement> pathcopy = new ArrayList<PathElement>(path);
+			flowpaths.put(flow, pathcopy);
 		}
 		path.remove(path.size()-1);
 		return;
