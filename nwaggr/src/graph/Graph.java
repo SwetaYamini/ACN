@@ -20,6 +20,7 @@ public class Graph {
 		if(nodes.containsKey(id)) return;
 		Node node = new Node(id);
 		nodes.put(id, node);
+		Configuration.NODEID = id+1;
 	}
 
 	public boolean addEdge(int nodeId, int id){
@@ -51,6 +52,39 @@ public class Graph {
 				nodes.put(node.id, node);
 			}
 		}
+	}
+	
+	public void createFlowGraphs(){
+		Iterator<Node> it = nodes.values().iterator();
+		while(it.hasNext()){
+			Node node = it.next();
+			if(node.type==Configuration.EXTERNALNODE){
+				node.createFlowGraph();
+				node.printFlowGraph();
+			}
+		}
+	}
+	
+	public void Initialize(){
+		addExternalNodes();
+		printGraph();
+		createFlowGraphs();
+	}
+	
+	public void printGraph(){
+		System.out.println("Graph");
+		Iterator<Node> it = nodes.values().iterator();
+		while(it.hasNext()){
+			Node node = it.next();
+			System.out.print("Node "+node.id+": ");
+			Iterator<Edge> it2 = node.edges.values().iterator();
+			while(it2.hasNext()){
+				Edge edge = it2.next();
+				System.out.print("("+edge.id+","+edge.getOtherNode(node)+")");
+			}
+			System.out.println();
+		}
+		System.out.println();
 	}
 	
 
