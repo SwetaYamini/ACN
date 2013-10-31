@@ -25,17 +25,20 @@ public class Flow implements Comparable<Flow> {
 			if(compareHelper(this, f, f.len)==0){
 				overlap.ips = this.ips;
 				overlap.len = this.len;
+				overlap.empty=0;
 			}
 		}else{
 			if(compareHelper(this, f, this.len)==0){
 				overlap.ips = f.ips;
 				overlap.len = f.len;
+				overlap.empty=0;
 			}
 		}
 		return overlap;
 	}
 	
 	public int compareHelper(Flow f1, Flow f2, int len){
+		//if(len==0) return 
 		for(int i=0;i<len;i++){
 			if(f1.ips[i]!=f2.ips[i]) return 1;
 		}
@@ -85,12 +88,20 @@ public class Flow implements Comparable<Flow> {
 	}
 	
 	public String toString(){
-		String ret="";
+		String ret="empty:" + empty + " len: "+len +" ";
 		for(int i=0;i<this.len;i++){
 			ret+=ips[i];
 		}
 		return ret;
 	}
 
+	public static void main(String[] args){
+		Flow f1 = new Flow();
+		f1.empty=0;
+		Flow f2 = new Flow();
+		f2.empty=0;
+		Flow f = f1.overlap(f2);
+		System.out.println(f);
+	}
 	
 }

@@ -16,15 +16,16 @@ public class Graph {
 		edges = new HashMap<Integer, Edge>();
 	}
 
-	public void addNode(int id){
-		if(nodes.containsKey(id)) return;
+	public Node addNode(int id){
+		if(nodes.containsKey(id)) return nodes.get(id);
 		Node node = new Node(id);
 		nodes.put(id, node);
 		Configuration.NODEID = id+1;
+		return node;
 	}
 
-	public boolean addEdge(int nodeId, int id){
-		if(!nodes.containsKey(nodeId)) return false;
+	public Edge addEdge(int nodeId, int id){
+		if(!nodes.containsKey(nodeId)) return null;
 		Node node = nodes.get(nodeId);
 		Edge edge;
 		if(!edges.containsKey(id)){
@@ -33,11 +34,11 @@ public class Graph {
 			edges.put(id, edge);
 		}else{
 			edge = edges.get(id);
-			if(edge.node2!=null) return false;
+			if(edge.node2!=null) return null;
 			edge.node2 = node;
 		}
 		node.addEdge(edge);
-		return true;
+		return edge;
 	}
 
 	public void addExternalNodes(){
@@ -86,6 +87,8 @@ public class Graph {
 		}
 		System.out.println();
 	}
+	
+	
 	
 
 	public boolean validate(){
