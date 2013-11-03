@@ -3,36 +3,45 @@ package swiconsim.controller;
 import java.util.Map;
 import java.util.Set;
 
+import swiconsim.host.Host;
 import swiconsim.nwswitch.Switch;
 
 /**
  * @author praveen
- *
- * Topology - seen by a controller
+ * 
+ *         Topology - seen by a controller
  */
 public class Topology {
 	Set<Switch> switches;
 	Map<Long, Long> edges;
-	public Topology(Set<Switch> switches, Map<Long, Long> edges) {
+	Set<Host> hosts;
+
+	public Topology(Set<Switch> switches, Map<Long, Long> edges, Set<Host> hosts) {
 		super();
 		this.switches = switches;
 		this.edges = edges;
+		this.hosts = hosts;
 	}
+
 	@Override
 	public String toString() {
-		String ret  = "Topology [switches={";
-		for(Switch sw : switches) {
+		String ret = "Topology [Switches={";
+
+		for (Switch sw : switches) {
 			ret += sw.getId() + ", ";
 		}
-		ret += "}\nEdges={";
+		ret += "} , Edges=\n";
 		for (Long portId1 : edges.keySet()) {
-			ret += portId1 + "\t" + edges.get(portId1) + "\n";
+			ret += portId1 + " - " + edges.get(portId1) + "\n";
 		}
-		ret += "}]";
+		
+		ret += "Hosts=";
+		for(Host host : hosts){
+			ret += host.getId() + "(" + host.getIp() + ")" + ", ";
+		}
+		
+		ret += "]";
+
 		return ret;
 	}
-	
-	
-	
-	
 }

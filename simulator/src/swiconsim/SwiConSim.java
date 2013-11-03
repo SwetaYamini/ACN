@@ -48,11 +48,12 @@ public class SwiConSim {
 		s2.addHost(h2, (short) 3);
 		s3.addHost(h3, (short) 2);
 
-		// Add edge s1:2 <-> s2:2
+		// Add edge s1:2 <-> s2:2 and s2:4 <-> s3:1
 		DataNetwork.getInstance().addEdge(s1_id, (short) 2, s2_id, (short) 2);
+		DataNetwork.getInstance().addEdge(s2_id, (short) 4, s3_id, (short) 1);
 
-		System.out.print(c1.getTopology().toString());
-		System.out.print(c2.getTopology().toString());
+		System.out.println(c1.getTopology().toString());
+		System.out.println(c2.getTopology().toString());
 
 		// Add flows on s1 and s2 towards h2
 		Match match = new Match(MatchField.DST, IPUtil.stringToIP("1.1.1.2"));

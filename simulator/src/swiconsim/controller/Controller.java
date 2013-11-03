@@ -5,6 +5,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.logging.Logger;
 
@@ -13,6 +14,7 @@ import swiconsim.api.IController;
 import swiconsim.api.IControllerSouthBound;
 import swiconsim.api.ISwitchControlPlane;
 import swiconsim.flow.Flow;
+import swiconsim.host.Host;
 import swiconsim.messages.MessageType;
 import swiconsim.network.DataNetwork;
 import swiconsim.network.ManagementNetwork;
@@ -113,9 +115,24 @@ public class Controller implements ISwitchControlPlane, IController,
 	@Override
 	public Topology getTopology() {
 		Set<Switch> switches = new HashSet<Switch>();
-		switches.addAll(DataNetwork.getInstance().getSwMap().values());
-		Topology topology = new Topology(switches, new HashMap<Long, Long>(DataNetwork
-				.getInstance().getLinks()));
+		Set<Host> hosts = new HashSet<Host>();
+		Map <Long, Long>links = new HashMap<Long, Long>();
+		Map <Long, Long> allLinks  = DataNetwork.getInstance().getLinks();
+		Map<Long, Switch> allSwitches = DataNetwork.getInstance().getSwMap();
+		for(long swid : this.switches){
+			Switch sw = allSwitches.get(swid);
+			switches.add(sw);
+			for(Port port : sw.getPorts()){
+				if(allLinks.containsKey(port.getId())){
+					links.put(port.getId(), allLinks.get(port.getId()));
+				}
+				if(port.getHost() != null){
+					hosts.add(port.getHost());
+				}
+			}
+		}
+		
+		Topology topology = new Topology(switches, links, hosts);
 		return topology;
 
 	}

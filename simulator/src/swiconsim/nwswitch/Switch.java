@@ -110,7 +110,7 @@ public class Switch implements ISwitchControlPlane, ISwitchDataPlane {
 		cp.receiveNotificationFromController(msg);
 	}
 
-	public String toString() {
+	public String toString2() {
 		String ret = "Switch: " + this.id;
 		ret += "\nController: " + this.cp.cid;
 		ret += "\nPorts: ";
@@ -118,6 +118,18 @@ public class Switch implements ISwitchControlPlane, ISwitchDataPlane {
 			ret += port.getId() + "\t";
 		}
 		ret += "\nFlow Table :\n" + this.dp.getFlowTable().toString();
+		return ret;
+	}
+	
+
+	@Override
+	public String toString() {
+		String ret = "Switch [id=" + id + ",  controller=" + cp.cid + ", ports={";
+		for (Port port : ports.values()) {
+			ret += port.getId() + ", ";
+		}
+		
+		ret += "}, flowTable=" + flowTable.toString() + "]";
 		return ret;
 	}
 
