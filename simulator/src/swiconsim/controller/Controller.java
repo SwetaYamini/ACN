@@ -12,32 +12,34 @@ import java.util.logging.Logger;
 import swiconsim.messages.Message;
 import swiconsim.api.IController;
 import swiconsim.api.IControllerSouthBound;
-import swiconsim.api.ISwitchControlPlane;
+import swiconsim.api.IControlPlane;
 import swiconsim.flow.Flow;
 import swiconsim.host.Host;
-import swiconsim.messages.MessageType;
 import swiconsim.network.DataNetwork;
-import swiconsim.network.ManagementNetwork;
 import swiconsim.nwswitch.Switch;
 import swiconsim.nwswitch.port.Port;
 import swiconsim.packet.Packet;
 
 /**
  * @author praveen
- *
- * Controller
+ * 
+ *         Controller
  * 
  */
-public class Controller implements ISwitchControlPlane, IController,
+public class Controller implements IControlPlane, IController,
 		IControllerSouthBound {
 	private static Logger logger = Logger.getLogger("sim:");
 	long id;
 	List<Long> switches;
+	ControllerControlPlane ccp;
+	ControllerSouthBound csb;
 
 	public Controller(long id) {
 		super();
 		this.id = id;
 		switches = new ArrayList<Long>();
+		// ccp = new ControllerControlPlane(id);
+		csb = new ControllerSouthBound(id, switches, this);
 		registerWithMgmtNet();
 	}
 
@@ -46,94 +48,139 @@ public class Controller implements ISwitchControlPlane, IController,
 		return id;
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see swiconsim.api.IControlPlane#addFlow(swiconsim.flow.Flow)
+	 */
 	@Override
-	public void addFlow(Flow f) {
-		// TODO Auto-generated method stub
-
+	public void addFlow(Flow flow) {
+		this.ccp.addFlow(flow);
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see swiconsim.api.IControlPlane#removeFlow(swiconsim.flow.Flow)
+	 */
 	@Override
-	public void removeFlow(Flow f) {
-		// TODO Auto-generated method stub
-
+	public void removeFlow(Flow flow) {
+		this.ccp.removeFlow(flow);
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see swiconsim.api.IControlPlane#getPorts()
+	 */
 	@Override
 	public Collection<Port> getPorts() {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see
+	 * swiconsim.api.IControlPlane#sendPktInController(swiconsim.packet.Packet)
+	 */
 	@Override
 	public void sendPktInController(Packet pkt) {
 		// TODO Auto-generated method stub
 
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see swiconsim.api.IControlPlane#registerWithController(long)
+	 */
 	@Override
 	public void registerWithController(long cid) {
 		// TODO Auto-generated method stub
 
 	}
 
-	@Override
-	public void receiveNotificationFromSwitch(Message msg) {
-		switch (msg.getType()) {
-		case HELLO:
-			long switchId = (Long) msg.getPayload();
-			logger.info(this.id + "Hello from " + switchId);
-			switches.add(switchId);
-			break;
-		default:
-			break;
-		}
-	}
-
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see
+	 * swiconsim.api.IControlPlane#receiveNotificationFromController(swiconsim
+	 * .messages.Message)
+	 */
 	@Override
 	public void receiveNotificationFromController(Message msg) {
 		// TODO Auto-generated method stub
 
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see
+	 * swiconsim.api.IControllerSouthBound#receiveNotificationFromSwitch(swiconsim
+	 * .messages.Message)
+	 */
 	@Override
-	public void addFlowToSwitch(long swid, Flow flow) {
-		Message msg = new Message(swid, MessageType.OFPFC_ADD, flow, this.id);
-		ManagementNetwork.getInstance().sendNotificationToSwitch(msg);
+	public void receiveNotificationFromSwitch(Message msg) {
+		this.csb.receiveNotificationFromSwitch(msg);
 	}
 
-	@Override
-	public void deleteFlowFromSwitch(long swid, Flow flow) {
-		Message msg = new Message(swid, MessageType.OFPFC_DELETE, flow, this.id);
-		ManagementNetwork.getInstance().sendNotificationToSwitch(msg);
-	}
-
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see swiconsim.api.IControllerSouthBound#registerWithMgmtNet()
+	 */
 	@Override
 	public void registerWithMgmtNet() {
-		ManagementNetwork.getInstance().registerController(id, this);
+		this.csb.registerWithMgmtNet();
 	}
 
+	/* (non-Javadoc)
+	 * @see swiconsim.api.IControllerSouthBound#addFlowToSwitch(long, swiconsim.flow.Flow)
+	 */
+	@Override
+	public void addFlowToSwitch(long swid, Flow flow) {
+		this.csb.addFlowToSwitch(swid, flow);
+	}
+
+	/* (non-Javadoc)
+	 * @see swiconsim.api.IControllerSouthBound#deleteFlowFromSwitch(long, swiconsim.flow.Flow)
+	 */
+	@Override
+	public void deleteFlowFromSwitch(long swid, Flow flow) {
+		this.csb.deleteFlowFromSwitch(swid, flow);
+	}
+	
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see swiconsim.api.IController#getTopology()
+	 */
 	@Override
 	public Topology getTopology() {
+		logger.info("Getting topology");
 		Set<Switch> switches = new HashSet<Switch>();
 		Set<Host> hosts = new HashSet<Host>();
-		Map <Long, Long>links = new HashMap<Long, Long>();
-		Map <Long, Long> allLinks  = DataNetwork.getInstance().getLinks();
+		Map<Long, Long> links = new HashMap<Long, Long>();
+		Map<Long, Long> allLinks = DataNetwork.getInstance().getLinks();
 		Map<Long, Switch> allSwitches = DataNetwork.getInstance().getSwMap();
-		for(long swid : this.switches){
+		for (long swid : this.switches) {
 			Switch sw = allSwitches.get(swid);
 			switches.add(sw);
-			for(Port port : sw.getPorts()){
-				if(allLinks.containsKey(port.getId())){
+			for (Port port : sw.getPorts()) {
+				if (allLinks.containsKey(port.getId())) {
 					links.put(port.getId(), allLinks.get(port.getId()));
 				}
-				if(port.getHost() != null){
+				if (port.getHost() != null) {
 					hosts.add(port.getHost());
 				}
 			}
 		}
-		
 		Topology topology = new Topology(switches, links, hosts);
 		return topology;
-
 	}
+
+	
 }

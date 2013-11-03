@@ -4,7 +4,7 @@ import java.util.Collection;
 import java.util.HashMap;
 
 import swiconsim.messages.Message;
-import swiconsim.api.ISwitchControlPlane;
+import swiconsim.api.IControlPlane;
 import swiconsim.api.ISwitchDataPlane;
 import swiconsim.flow.Flow;
 import swiconsim.host.Host;
@@ -20,7 +20,7 @@ import swiconsim.util.PortUtil;
  * 
  *         Switch - control plane and data plane
  */
-public class Switch implements ISwitchControlPlane, ISwitchDataPlane {
+public class Switch implements IControlPlane, ISwitchDataPlane {
 
 	SwitchControlPlane cp;
 	SwitchDataPlane dp;

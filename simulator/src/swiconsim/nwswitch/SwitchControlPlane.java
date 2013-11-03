@@ -5,7 +5,7 @@ import java.util.HashMap;
 import java.util.logging.Logger;
 
 import swiconsim.messages.Message;
-import swiconsim.api.ISwitchControlPlane;
+import swiconsim.api.IControlPlane;
 import swiconsim.flow.Flow;
 import swiconsim.messages.MessageType;
 import swiconsim.network.ManagementNetwork;
@@ -18,7 +18,7 @@ import swiconsim.packet.Packet;
  * Control Plane of a switch
  *
  */
-public class SwitchControlPlane implements ISwitchControlPlane {
+public class SwitchControlPlane implements IControlPlane {
 	long id;
 	private HashMap<Short, Port> ports;
 	private FlowTable flowTable;
