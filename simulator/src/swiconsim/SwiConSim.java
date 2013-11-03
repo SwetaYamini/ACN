@@ -26,7 +26,7 @@ public class SwiConSim {
 		long c1_id = 1001l, s1_id=1, s2_id=2;
 		Controller c1 = new Controller(c1_id);
 		Switch s1 = new Switch(s1_id, 4, c1_id);
-		Switch s2 = new Switch(s2_id, 4, (short)c1_id);
+		Switch s2 = new Switch(s2_id, 4, c1_id);
 		System.out.print(c1.getTopology().toString());
 		
 		// Add a flow on s1
@@ -49,7 +49,7 @@ public class SwiConSim {
 		
 		// this one shouldn't match - pkt will go to controller
 		pkt = new Packet((short) 0, IPUtil.stringToIP("1.3.3.4"), IPUtil.stringToIP("2.2.2.2"), 15);
-		DataNetwork.getInstance().pushPkt(pkt, 1100001);
+		DataNetwork.getInstance().pushPkt(pkt, PortUtil.calculatePortId(s1_id, (short)1));
 		System.out.println(s1.toString());
 		System.out.println(s2.toString());
 		
