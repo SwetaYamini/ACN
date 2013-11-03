@@ -94,13 +94,17 @@ public class FlowTable {
 		return actions;
 	}
 
+	
+	
+	@Override
 	public String toString() {
-		String ret = "FlowTable:\nnLookups=" + nLookups + "\tnMatches="
-				+ nMatches + "\n";
+		String ret = "FlowTable [ nLookups="
+				+ nLookups + ", nMatches=" + nMatches + "\nflowEntries=\n";
 		for (Flow flow : flowEntries.keySet()) {
-			ret += flow.toString() + "\t" + flowEntries.get(flow).toString()
+			ret += "\t" + flow.toString() + "\t" + flowEntries.get(flow).toString()
 					+ "\n";
 		}
+		ret += "]";
 		return ret;
 	}
 }

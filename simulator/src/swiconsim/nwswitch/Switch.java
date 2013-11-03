@@ -7,6 +7,7 @@ import swiconsim.messages.Message;
 import swiconsim.api.ISwitchControlPlane;
 import swiconsim.api.ISwitchDataPlane;
 import swiconsim.flow.Flow;
+import swiconsim.host.Host;
 import swiconsim.network.DataNetwork;
 import swiconsim.network.ManagementNetwork;
 import swiconsim.nwswitch.port.Port;
@@ -16,8 +17,8 @@ import swiconsim.util.PortUtil;
 
 /**
  * @author praveen
- *
- * Switch - control plane and data plane
+ * 
+ *         Switch - control plane and data plane
  */
 public class Switch implements ISwitchControlPlane, ISwitchDataPlane {
 
@@ -42,7 +43,7 @@ public class Switch implements ISwitchControlPlane, ISwitchDataPlane {
 		flowTable = new FlowTable();
 		ports = new HashMap<Short, Port>();
 		for (short i = 1; i <= numPorts; i++) {
-			Port port = new Port(PortUtil.calculatePortId(id, i), PortStatus.UP);
+			Port port = new Port(PortUtil.calculatePortId(id, i), PortStatus.UP, this);
 			ports.put(i, port);
 		}
 
@@ -118,5 +119,20 @@ public class Switch implements ISwitchControlPlane, ISwitchDataPlane {
 		}
 		ret += "\nFlow Table :\n" + this.dp.getFlowTable().toString();
 		return ret;
+	}
+
+	public boolean addHost(long id, String ip, short portNum) {
+		Host host = new Host(id, ip);
+		return addHost(host, portNum);
+	}
+
+	public boolean addHost(Host host, short portNum) {
+		Port p = this.ports.get(portNum);
+		if (p.getHost() == null) {
+			p.setHost(host);
+			return true;
+		} else {
+			return false;
+		}
 	}
 }

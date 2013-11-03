@@ -4,8 +4,8 @@ import swiconsim.util.IPUtil;
 
 /**
  * @author praveen
- *
- * the fields in a pkt that have to be matched 
+ * 
+ *         the fields in a pkt that have to be matched
  */
 public class PacketIdentifier {
 	short in_port;
@@ -49,9 +49,11 @@ public class PacketIdentifier {
 		this.nw_dst = nw_dst;
 	}
 
+	@Override
 	public String toString() {
-		return "[" + IPUtil.toString(nw_src) + " -  " + IPUtil.toString(nw_dst)
-				+ "]";
+		return "PacketIdentifier [in_port=" + in_port + ", nw_src="
+				+ IPUtil.toString(nw_src) + ", nw_dst="
+				+ IPUtil.toString(nw_dst) + "]";
 	}
 
 }

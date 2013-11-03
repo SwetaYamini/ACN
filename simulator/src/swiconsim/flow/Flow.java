@@ -47,12 +47,17 @@ public class Flow {
 	public void removeAction(Action action){
 		this.actions.remove(action);
 	}
-	public String toString(){
-		String ret = "{" + this.match.toString() + "} \t {";
+	
+	
+	
+	
+	@Override
+	public String toString() {
+		String ret = "Flow [match=" + match.toString() + ", actions=";
 		for(Action action : this.actions){
-			ret += action.toString()+ " ,";
+			ret += action.toString()+ ", ";
 		}
-		ret += "}";
+		ret += "priority=" + priority + "]";
 		return ret;
 	}
 

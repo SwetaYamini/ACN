@@ -7,6 +7,7 @@ import java.util.logging.Logger;
 import swiconsim.api.ISwitchDataPlane;
 import swiconsim.flow.Action;
 import swiconsim.flow.ActionType;
+import swiconsim.host.Host;
 import swiconsim.network.DataNetwork;
 import swiconsim.nwswitch.port.Port;
 import swiconsim.packet.Packet;
@@ -14,9 +15,9 @@ import swiconsim.packet.PacketIdentifier;
 
 /**
  * @author praveen
- *
- * Data Plane of a switch
- *
+ * 
+ *         Data Plane of a switch
+ * 
  */
 public class SwitchDataPlane implements ISwitchDataPlane {
 	long id;
@@ -40,8 +41,11 @@ public class SwitchDataPlane implements ISwitchDataPlane {
 		this.flowTable = flowTable;
 	}
 
-	/* (non-Javadoc)
-	 * @see swiconsim.api.ISwitchDataPlane#receivePkt(swiconsim.packet.Packet, short)
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see swiconsim.api.ISwitchDataPlane#receivePkt(swiconsim.packet.Packet,
+	 * short)
 	 */
 	@Override
 	public boolean receivePkt(Packet pkt, short in_port) {
@@ -49,30 +53,38 @@ public class SwitchDataPlane implements ISwitchDataPlane {
 		pkt.setIn_port(in_port);
 		PacketIdentifier pktIden = new PacketIdentifier(pkt);
 		List<Action> actions = flowTable.lookup(pktIden, pkt.getSize());
-		if(actions.isEmpty()){
+		if (actions.isEmpty()) {
 			return false;
-		}
-		else{
+		} else {
 			applyActions(pkt, actions);
 		}
 		return true;
 	}
 
-	/* (non-Javadoc)
-	 * @see swiconsim.api.ISwitchDataPlane#sendPkt(swiconsim.packet.Packet, short)
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see swiconsim.api.ISwitchDataPlane#sendPkt(swiconsim.packet.Packet,
+	 * short)
 	 */
 	@Override
 	public void sendPkt(Packet pkt, short out_port) {
-		DataNetwork.getInstance().handlePkt(pkt, ports.get(out_port).getId());
+		Port port = this.ports.get(out_port);
+		Host host = port.getHost();
+		if (host != null) {
+			host.receivePkt(pkt);
+		} else {
+			DataNetwork.getInstance().handlePkt(pkt, port.getId());
+		}
 	}
-	
-	public void applyActions(Packet pkt, List<Action> actions){
-		for(Action action : actions){
-			if(action.getType() == ActionType.OUT_PORT){
-				short out_port = (short)action.getValue();
+
+	public void applyActions(Packet pkt, List<Action> actions) {
+		for (Action action : actions) {
+			if (action.getType() == ActionType.OUT_PORT) {
+				short out_port = (short) action.getValue();
 				sendPkt(pkt, out_port);
 			}
 		}
 	}
-	
+
 }

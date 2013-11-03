@@ -41,6 +41,25 @@ public class Match {
 		this.nw_dst_mask = 32;
 	}
 	
+	public Match(MatchField field, int value) {
+		super();
+		switch(field){
+		case IN_PORT:
+			this.in_port = (short) value;
+			break;
+		case SRC:
+			this.nw_src = value;
+			this.nw_src_mask = 32;
+			break;
+		case DST:
+			this.nw_dst = value;
+			this.nw_dst_mask = 32;
+			break;
+		default:
+			break;		
+		}
+	}
+
 	public Match(short in_port, int nw_src, int nw_src_mask, int nw_dst,
 			int nw_dst_mask) {
 		super();
@@ -103,14 +122,15 @@ public class Match {
         return false;
 	}
 	
-	public String toString() {
-        String ret = "Match: {";
-        ret = "inputPort=" + (in_port==0 ? "*" : in_port);
-        ret += ", IPSrc=" + (IPUtil.maskedIPToString(nw_src, nw_src_mask));
-        ret += ", IPDst=" + (IPUtil.maskedIPToString(nw_dst, nw_dst_mask));
-        return ret + "}";
-    }
 	
+	
+	
+	@Override
+	public String toString() {
+		return "Match [in_port=" + (in_port==0 ? "*" : in_port) + ", nw_src=" + (IPUtil.maskedIPToString(nw_src, nw_src_mask))
+				+", nw_dst=" + (IPUtil.maskedIPToString(nw_dst, nw_dst_mask)) + "]";
+	}
+
 	public boolean isMatch(PacketIdentifier pktIden){
 		short pktin_port = this.in_port==0?0:pktIden.getIn_port();
 		Match candidate = new Match(pktin_port, pktIden.getNw_src(),  this.nw_src_mask, pktIden.getNw_dst(), this.nw_dst_mask);
