@@ -1,6 +1,6 @@
 package swiconsim.api;
 
-import java.util.Collection;
+import java.util.Set;
 
 import swiconsim.messages.Message;
 import swiconsim.flow.Flow;
@@ -35,7 +35,7 @@ public interface IControlPlane {
 	/**
 	 * @return
 	 */
-	Collection<Port> getPorts();
+	Set<Port> getPorts();
 
 	/**
 	 * forward an in-pkt to controller

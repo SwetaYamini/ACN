@@ -20,7 +20,7 @@ import swiconsim.util.PortUtil;
 public class SwiConSim {
 
 	public static void main(String[] args) {
-		samplerun1();
+		samplerun2();
 	}
 
 	static void samplerun1() {
@@ -89,4 +89,63 @@ public class SwiConSim {
 		System.out.println(h2.toString());
 	}
 
+	
+	static void samplerun2() {
+		/*
+		 * Start network elements
+		 */
+
+		// c3 - c1 - s1 - h1
+		// c3 - c2 - s2 - h2
+		long c1_id = 1001l, c2_id = 1002l, c3_id = 1003l, s1_id = 1, s2_id = 2, h1_id = 1, h2_id = 2;
+
+		Controller c3 = new Controller(c3_id);
+		Controller c1 = new Controller(c1_id, c3_id);
+		Controller c2 = new Controller(c2_id, c3_id);
+		
+		Switch s1 = new Switch(s1_id, 4, c1_id);
+		Switch s2 = new Switch(s2_id, 4, c2_id);
+
+		Host h1 = new Host(h1_id, "1.1.1.1");
+		Host h2 = new Host(h2_id, "1.1.1.2");
+
+		s1.addHost(h1, (short) 1);
+		s2.addHost(h2, (short) 3);
+
+		// Add edge s1:3 <-> s2:2
+		DataNetwork.getInstance().addEdge(s1_id, (short) 2, s2_id, (short) 2);
+
+		System.out.println(c1.getTopology().toString());
+		System.out.println(c2.getTopology().toString());
+		System.out.println(c3.getTopology().toString());
+
+		// Add flows on s3 for outport 
+		Match match = new Match(MatchField.DST, IPUtil.stringToIP("1.1.1.2"));
+		List<Action> actions = new ArrayList<Action>();
+		actions.add(new Action(ActionType.OUT_PORT, 3));
+		Flow flow = new Flow(match, actions, (short) 10);
+		c3.addFlowToSwitch(c1_id, flow);
+		c3.addFlowToSwitch(c2_id, flow);
+		System.out.println(s1.toString());
+		System.out.println(s2.toString());
+
+		// Send pkt from h1 to h2
+		Packet pkt = new Packet((short) 0, IPUtil.stringToIP("1.1.1.1"),
+				IPUtil.stringToIP("1.1.1.2"), 10);
+		h1.sendPkt(pkt);
+		System.out.println(s1.toString());
+		System.out.println(s2.toString());
+		System.out.println(h1.toString());
+		System.out.println(h2.toString());
+
+		// this one shouldn't match - pkt will go to controller
+		pkt = new Packet((short) 0, IPUtil.stringToIP("1.1.1.1"),
+				IPUtil.stringToIP("2.1.1.1"), 15);
+		h1.sendPkt(pkt);
+		System.out.println(s1.toString());
+		System.out.println(s2.toString());
+		System.out.println(h1.toString());
+		System.out.println(h2.toString());
+	}
+	
 }

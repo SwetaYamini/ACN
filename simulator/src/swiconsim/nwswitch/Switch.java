@@ -1,7 +1,7 @@
 package swiconsim.nwswitch;
 
-import java.util.Collection;
 import java.util.HashMap;
+import java.util.Set;
 
 import swiconsim.messages.Message;
 import swiconsim.api.IControlPlane;
@@ -10,6 +10,7 @@ import swiconsim.flow.Flow;
 import swiconsim.host.Host;
 import swiconsim.network.DataNetwork;
 import swiconsim.network.ManagementNetwork;
+import swiconsim.node.Node;
 import swiconsim.nwswitch.port.Port;
 import swiconsim.nwswitch.port.PortStatus;
 import swiconsim.packet.Packet;
@@ -20,11 +21,11 @@ import swiconsim.util.PortUtil;
  * 
  *         Switch - control plane and data plane
  */
-public class Switch implements IControlPlane, ISwitchDataPlane {
+public class Switch extends Node implements IControlPlane, ISwitchDataPlane {
 
 	SwitchControlPlane cp;
 	SwitchDataPlane dp;
-	long id;
+	
 	private HashMap<Short, Port> ports;
 	private FlowTable flowTable;
 
@@ -38,8 +39,7 @@ public class Switch implements IControlPlane, ISwitchDataPlane {
 	}
 
 	public Switch(long id, int numPorts) {
-		super();
-		this.id = id;
+		super(id);
 		flowTable = new FlowTable();
 		ports = new HashMap<Short, Port>();
 		for (short i = 1; i <= numPorts; i++) {
@@ -69,8 +69,8 @@ public class Switch implements IControlPlane, ISwitchDataPlane {
 	}
 
 	@Override
-	public Collection<Port> getPorts() {
-		return this.ports.values();
+	public Set<Port> getPorts() {
+		return cp.getPorts();
 	}
 
 	@Override

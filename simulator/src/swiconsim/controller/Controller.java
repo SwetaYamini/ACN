@@ -1,7 +1,6 @@
 package swiconsim.controller;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -16,6 +15,7 @@ import swiconsim.api.IControlPlane;
 import swiconsim.flow.Flow;
 import swiconsim.host.Host;
 import swiconsim.network.DataNetwork;
+import swiconsim.node.Node;
 import swiconsim.nwswitch.Switch;
 import swiconsim.nwswitch.port.Port;
 import swiconsim.packet.Packet;
@@ -26,19 +26,23 @@ import swiconsim.packet.Packet;
  *         Controller
  * 
  */
-public class Controller implements IControlPlane, IController,
+public class Controller extends Node implements IControlPlane, IController,
 		IControllerSouthBound {
 	private static Logger logger = Logger.getLogger("sim:");
-	long id;
 	List<Long> switches;
 	ControllerControlPlane ccp;
 	ControllerSouthBound csb;
 
+	public Controller(long id, long cid) {
+		this(id);
+		registerWithController(cid);
+	}
+
 	public Controller(long id) {
-		super();
+		super(id);
 		this.id = id;
 		switches = new ArrayList<Long>();
-		// ccp = new ControllerControlPlane(id);
+		ccp = new ControllerControlPlane(id, this);
 		csb = new ControllerSouthBound(id, switches, this);
 		registerWithMgmtNet();
 	}
@@ -74,7 +78,7 @@ public class Controller implements IControlPlane, IController,
 	 * @see swiconsim.api.IControlPlane#getPorts()
 	 */
 	@Override
-	public Collection<Port> getPorts() {
+	public Set<Port> getPorts() {
 		// TODO Auto-generated method stub
 		return null;
 	}
@@ -98,8 +102,7 @@ public class Controller implements IControlPlane, IController,
 	 */
 	@Override
 	public void registerWithController(long cid) {
-		// TODO Auto-generated method stub
-
+		ccp.registerWithController(cid);
 	}
 
 	/*
@@ -137,22 +140,28 @@ public class Controller implements IControlPlane, IController,
 		this.csb.registerWithMgmtNet();
 	}
 
-	/* (non-Javadoc)
-	 * @see swiconsim.api.IControllerSouthBound#addFlowToSwitch(long, swiconsim.flow.Flow)
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see swiconsim.api.IControllerSouthBound#addFlowToSwitch(long,
+	 * swiconsim.flow.Flow)
 	 */
 	@Override
 	public void addFlowToSwitch(long swid, Flow flow) {
 		this.csb.addFlowToSwitch(swid, flow);
 	}
 
-	/* (non-Javadoc)
-	 * @see swiconsim.api.IControllerSouthBound#deleteFlowFromSwitch(long, swiconsim.flow.Flow)
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see swiconsim.api.IControllerSouthBound#deleteFlowFromSwitch(long,
+	 * swiconsim.flow.Flow)
 	 */
 	@Override
 	public void deleteFlowFromSwitch(long swid, Flow flow) {
 		this.csb.deleteFlowFromSwitch(swid, flow);
 	}
-	
+
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -165,16 +174,19 @@ public class Controller implements IControlPlane, IController,
 		Set<Host> hosts = new HashSet<Host>();
 		Map<Long, Long> links = new HashMap<Long, Long>();
 		Map<Long, Long> allLinks = DataNetwork.getInstance().getLinks();
-		Map<Long, Switch> allSwitches = DataNetwork.getInstance().getSwMap();
+		Map<Long, Node> allSwitches = DataNetwork.getInstance().getSwMap();
 		for (long swid : this.switches) {
-			Switch sw = allSwitches.get(swid);
-			switches.add(sw);
-			for (Port port : sw.getPorts()) {
-				if (allLinks.containsKey(port.getId())) {
-					links.put(port.getId(), allLinks.get(port.getId()));
-				}
-				if (port.getHost() != null) {
-					hosts.add(port.getHost());
+			Node node = allSwitches.get(swid);
+			if (node instanceof Switch) {
+				Switch sw = (Switch) node;
+				switches.add(sw);
+				for (Port port : sw.getPorts()) {
+					if (allLinks.containsKey(port.getId())) {
+						links.put(port.getId(), allLinks.get(port.getId()));
+					}
+					if (port.getHost() != null) {
+						hosts.add(port.getHost());
+					}
 				}
 			}
 		}
@@ -182,5 +194,4 @@ public class Controller implements IControlPlane, IController,
 		return topology;
 	}
 
-	
 }

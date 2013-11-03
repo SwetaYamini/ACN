@@ -1,7 +1,8 @@
 package swiconsim.nwswitch;
 
-import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.logging.Logger;
 
 import swiconsim.messages.Message;
@@ -14,9 +15,9 @@ import swiconsim.packet.Packet;
 
 /**
  * @author praveen
- *
- * Control Plane of a switch
- *
+ * 
+ *         Control Plane of a switch
+ * 
  */
 public class SwitchControlPlane implements IControlPlane {
 	long id;
@@ -24,7 +25,7 @@ public class SwitchControlPlane implements IControlPlane {
 	private FlowTable flowTable;
 	long cid;
 	private static Logger logger = Logger.getLogger("sim:");
-	
+
 	public SwitchControlPlane(long id, HashMap<Short, Port> ports,
 			FlowTable flowTable) {
 		super();
@@ -37,20 +38,22 @@ public class SwitchControlPlane implements IControlPlane {
 	public long getId() {
 		return this.id;
 	}
-	
+
 	@Override
 	public void addFlow(Flow f) {
 		flowTable.addFlowEntry(f);
 	}
-	
+
 	@Override
 	public void removeFlow(Flow f) {
 		flowTable.removeFlowEntry(f);
 	}
-	
+
 	@Override
-	public Collection<Port> getPorts() {
-		return ports.values();
+	public Set<Port> getPorts() {
+		Set<Port> ports = new HashSet<Port>();
+		ports.addAll(this.ports.values());
+		return ports;
 	}
 
 	@Override
@@ -62,7 +65,8 @@ public class SwitchControlPlane implements IControlPlane {
 	@Override
 	public void registerWithController(long cid) {
 		this.cid = cid;
-		Message hello = new Message(cid, MessageType.HELLO, new Long(this.id), this.id);
+		Message hello = new Message(cid, MessageType.HELLO, new Long(this.id),
+				this.id);
 		ManagementNetwork.getInstance().sendNotificationToController(hello);
 	}
 
@@ -83,7 +87,5 @@ public class SwitchControlPlane implements IControlPlane {
 			break;
 		}
 	}
-
-	
 
 }
