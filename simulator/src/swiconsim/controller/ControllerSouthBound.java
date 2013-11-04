@@ -41,16 +41,6 @@ public class ControllerSouthBound implements IControllerSouthBound {
 			long switchId = (Long) msg.getPayload();
 			logger.info(this.id + "Hello from " + switchId);
 			switches.add(switchId);
-			// add its ports to controller's ports
-			/*Set<Port> swPorts = ((Switch) (ManagementNetwork.getInstance()
-					.getNode(switchId))).getPorts();
-			for (Port swPort : swPorts) {
-				short portNum = (short) this.controller.getPorts().size();
-				Port port = new Port(swPort);
-				port.setId(PortUtil.calculatePortId(id, portNum));
-				this.controller.addPort(portNum, port);
-			}
-			*/
 			break;
 		default:
 			break;

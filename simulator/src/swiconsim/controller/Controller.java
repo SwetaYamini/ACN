@@ -20,6 +20,7 @@ import swiconsim.node.Node;
 import swiconsim.nwswitch.Switch;
 import swiconsim.nwswitch.port.Port;
 import swiconsim.packet.Packet;
+import swiconsim.util.PortUtil;
 
 /**
  * @author praveen
@@ -167,9 +168,15 @@ public class Controller extends Node implements IControlPlane, IController,
 	public Set<Port> getPorts() {
 		Set<Port> ports = new HashSet<Port>();
 		for (Long nodeId : this.nodes) {
-			Node node = ManagementNetwork.getInstance().getNode(nodeId);
-			ports.addAll(node.getPorts());
-		}
+			Set<Port> swPorts = ManagementNetwork.getInstance()
+					.getNode(nodeId).getPorts();
+			for (Port swPort : swPorts) {
+				short portNum = (short) ports.size();
+				Port port = new Port(swPort);
+				port.setId(PortUtil.calculatePortId(id, portNum));
+				this.addPort(portNum, port);
+			}
+		}	
 		return ports;
 	}
 
