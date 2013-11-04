@@ -113,7 +113,7 @@ public class SwiConSim {
 		s2.addHost(h2, (short) 3);
 
 		// Add edge s1:3 <-> s2:2
-		DataNetwork.getInstance().addEdge(s1_id, (short) 2, s2_id, (short) 2);
+		DataNetwork.getInstance().addEdge(s1_id, (short) 3, s2_id, (short) 2);
 
 		System.out.println(c1.getTopology().toString());
 		System.out.println(c2.getTopology().toString());

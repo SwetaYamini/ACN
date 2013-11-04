@@ -78,6 +78,7 @@ public abstract class Node implements IControlPlane {
 
 	@Override
 	public void receiveNotificationFromController(Message msg) {
+		logger.info(" rcvd ");
 		switch (msg.getType()) {
 		case OFPFC_ADD:
 			Flow flow = (Flow) msg.getPayload();

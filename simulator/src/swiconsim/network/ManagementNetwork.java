@@ -102,6 +102,7 @@ public class ManagementNetwork implements IManagementNetwork, IDataNetwork {
 		logger.info(msg.getFrom() + "->" + msg.getTo() + " " + msg.getType());
 		long swid = msg.getTo();
 		if (nodeMap.containsKey(swid)) {
+			logger.info("Sending to " + swid);
 			nodeMap.get(swid).receiveNotificationFromController(msg);
 		} else {
 			logger.warning("Switch not found - " + swid);

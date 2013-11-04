@@ -55,6 +55,7 @@ public class Controller extends Node implements IControlPlane, IController,
 
 	@Override
 	public void addFlow(Flow flow) {
+		logger.info("**** " + flow.toString());
 		for (Long swid : nodes) {
 			addFlowToSwitch(swid, flow);
 		}
@@ -75,19 +76,6 @@ public class Controller extends Node implements IControlPlane, IController,
 	 */
 	@Override
 	public void sendPktInController(Packet pkt) {
-		// TODO Auto-generated method stub
-
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * swiconsim.api.IControlPlane#receiveNotificationFromController(swiconsim
-	 * .messages.Message)
-	 */
-	@Override
-	public void receiveNotificationFromController(Message msg) {
 		// TODO Auto-generated method stub
 
 	}
