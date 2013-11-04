@@ -1,6 +1,8 @@
 package swiconsim.nwswitch;
 
 import java.util.HashMap;
+import java.util.TreeMap;
+
 import swiconsim.api.IControlPlane;
 import swiconsim.api.ISwitchDataPlane;
 import swiconsim.flow.Flow;
@@ -35,7 +37,7 @@ public class Switch extends Node implements IControlPlane, ISwitchDataPlane {
 	public Switch(long id, int numPorts) {
 		super(id);
 		flowTable = new FlowTable();
-		ports = new HashMap<Short, Port>();
+		ports = new TreeMap<Short, Port>();
 		for (short i = 1; i <= numPorts; i++) {
 			Port port = new Port(PortUtil.calculatePortId(id, i), PortStatus.UP, this);
 			ports.put(i, port);

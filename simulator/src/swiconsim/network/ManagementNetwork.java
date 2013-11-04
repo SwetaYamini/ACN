@@ -27,11 +27,17 @@ public class ManagementNetwork implements IManagementNetwork, IDataNetwork {
 	private static Logger logger = Logger.getLogger("sim:");
 
 	Map<Long, Long> links;
+	Map<Long, Long> virtualPortIdMap;
 	
+	public Map<Long, Long> getVirtualPortIdMap() {
+		return virtualPortIdMap;
+	}
+
 	protected ManagementNetwork() {
 		nodeMap = new HashMap<Long, Node>();
 		mgmtContMap = new HashMap<Long, Controller>();
 		links = new HashMap<Long, Long>();
+		virtualPortIdMap = new HashMap<Long, Long>();
 	}
 
 	public static ManagementNetwork getInstance() {

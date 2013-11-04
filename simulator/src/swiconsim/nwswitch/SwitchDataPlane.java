@@ -2,6 +2,7 @@ package swiconsim.nwswitch;
 
 import java.util.HashMap;
 import java.util.List;
+import java.util.TreeMap;
 import java.util.logging.Logger;
 
 import swiconsim.api.ISwitchDataPlane;
@@ -21,11 +22,11 @@ import swiconsim.packet.PacketIdentifier;
  */
 public class SwitchDataPlane implements ISwitchDataPlane {
 	long id;
-	private HashMap<Short, Port> ports;
+	private TreeMap<Short, Port> ports;
 	private FlowTable flowTable;
 	private static Logger logger = Logger.getLogger("sim:");
 
-	public SwitchDataPlane(long id, HashMap<Short, Port> ports,
+	public SwitchDataPlane(long id, TreeMap<Short, Port> ports,
 			FlowTable flowTable) {
 		super();
 		this.id = id;

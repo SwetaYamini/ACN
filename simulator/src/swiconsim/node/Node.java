@@ -1,8 +1,11 @@
 package swiconsim.node;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
+import java.util.TreeMap;
 import java.util.logging.Logger;
 
 import swiconsim.api.IControlPlane;
@@ -14,17 +17,17 @@ import swiconsim.nwswitch.FlowTable;
 import swiconsim.nwswitch.port.Port;
 import swiconsim.packet.Packet;
 
-public abstract class Node implements IControlPlane{
+public abstract class Node implements IControlPlane {
 	protected long id;
-	protected HashMap<Short, Port> ports;
+	protected TreeMap<Short, Port> ports;
 	private FlowTable flowTable;
 	protected long cid;
 	private static Logger logger = Logger.getLogger("sim:");
-	
+
 	public Node(long id) {
 		super();
 		this.id = id;
-		ports = new HashMap<Short, Port>();
+		ports = new TreeMap<Short, Port>();
 		flowTable = new FlowTable();
 		registerWithMgmtNodeAsNode();
 	}
@@ -36,26 +39,34 @@ public abstract class Node implements IControlPlane{
 	public void setId(long id) {
 		this.id = id;
 	}
-	
 
 	@Override
-	public Set<Port> getPorts() {
-		Set<Port> ports = new HashSet<Port>();
-		ports.addAll(this.ports.values());
+	public List<Port> getPorts() {
+		List<Port> ports = new ArrayList<Port>();
+		for (short i = 1; i <= this.ports.size(); i++) {
+			ports.add(this.ports.get(i));
+			if (!ManagementNetwork.getInstance().getVirtualPortIdMap()
+					.containsKey(this.ports.get(i).getId())) {
+				ManagementNetwork
+						.getInstance()
+						.getVirtualPortIdMap()
+						.put(this.ports.get(i).getId(),
+								this.ports.get(i).getId());
+			}
+		}
 		return ports;
 	}
-	
+
 	@Override
-	public void addPort(short portNum, Port port){
+	public void addPort(short portNum, Port port) {
 		this.ports.put(portNum, port);
 	}
-	
+
 	@Override
 	public void sendPktInController(Packet pkt) {
 		Message pktIn = new Message(cid, MessageType.PKT_IN, pkt, this.id);
 		ManagementNetwork.getInstance().sendNotificationToController(pktIn);
 	}
-	
 
 	@Override
 	public void registerWithController(long cid) {
@@ -82,9 +93,9 @@ public abstract class Node implements IControlPlane{
 			break;
 		}
 	}
-	
+
 	@Override
-	public void registerWithMgmtNodeAsNode(){
+	public void registerWithMgmtNodeAsNode() {
 		ManagementNetwork.getInstance().registerNode(id, this);
 	}
 }
