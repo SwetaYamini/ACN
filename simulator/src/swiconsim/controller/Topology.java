@@ -1,11 +1,14 @@
 package swiconsim.controller;
 
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 import swiconsim.host.Host;
 import swiconsim.node.Node;
 import swiconsim.nwswitch.Switch;
+import swiconsim.nwswitch.port.Port;
 
 /**
  * @author praveen
@@ -13,13 +16,13 @@ import swiconsim.nwswitch.Switch;
  *         Topology - seen by a controller
  */
 public class Topology {
-	Set<Node> nodes;
+	HashMap<Node, List<Port>> nodePorts;
 	Map<Long, Long> edges;
 	Set<Host> hosts;
 
-	public Topology(Set<Node> nodes, Map<Long, Long> edges, Set<Host> hosts) {
+	public Topology(HashMap<Node, List<Port>> nodePorts, Map<Long, Long> edges, Set<Host> hosts) {
 		super();
-		this.nodes = nodes;
+		this.nodePorts = nodePorts;
 		this.edges = edges;
 		this.hosts = hosts;
 	}
@@ -28,15 +31,19 @@ public class Topology {
 	public String toString() {
 		String ret = "Topology [Switches={";
 
-		for (Node sw : nodes) {
-			ret += sw.getId() + ", ";
+		for (Node sw : nodePorts.keySet()) {
+			ret += sw.getId() + " { ";
+			for(Port port : nodePorts.get(sw)){
+				ret += port.getId() + ", ";
+			}
+			ret += "}, ";
 		}
-		ret += "} , Edges=\n";
+		ret += "} , Edges={\n";
 		for (Long portId1 : edges.keySet()) {
 			ret += portId1 + " - " + edges.get(portId1) + "\n";
 		}
 		
-		ret += "Hosts=";
+		ret += "}\nHosts=";
 		for(Host host : hosts){
 			ret += host.getId() + "(" + host.getIp() + ")" + ", ";
 		}

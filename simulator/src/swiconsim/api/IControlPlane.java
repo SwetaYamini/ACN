@@ -1,5 +1,7 @@
 package swiconsim.api;
 
+import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import swiconsim.messages.Message;
@@ -35,7 +37,7 @@ public interface IControlPlane {
 	/**
 	 * @return
 	 */
-	Set<Port> getPorts();
+	List<Port> getPorts();
 	
 	/**
 	 * @param portNum

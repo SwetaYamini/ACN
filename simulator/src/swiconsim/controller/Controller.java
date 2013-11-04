@@ -6,6 +6,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeMap;
 import java.util.logging.Logger;
 
 import swiconsim.messages.Message;
@@ -20,6 +21,7 @@ import swiconsim.node.Node;
 import swiconsim.nwswitch.Switch;
 import swiconsim.nwswitch.port.Port;
 import swiconsim.packet.Packet;
+import swiconsim.util.PortUtil;
 
 /**
  * @author praveen
@@ -132,7 +134,7 @@ public class Controller extends Node implements IControlPlane, IController,
 	@Override
 	public Topology getTopology() {
 		logger.info("Getting topology");
-		Set<Node> nodes = new HashSet<Node>();
+		HashMap<Node, List<Port>> nodePorts = new HashMap<Node, List<Port>>();
 		Set<Host> hosts = new HashSet<Host>();
 		Map<Long, Long> links = new HashMap<Long, Long>();
 		Map<Long, Long> switchLinks = DataNetwork.getInstance().getLinks();
@@ -141,7 +143,7 @@ public class Controller extends Node implements IControlPlane, IController,
 		for (long nodeId : this.nodes) {
 			logger.info("Node : " + nodeId);
 			Node node = allNodes.get(nodeId);
-			nodes.add(node);
+			nodePorts.put(node, node.getPorts());
 			for (Port port : node.getPorts()) {
 				if (switchLinks.containsKey(port.getId())) {
 					links.put(port.getId(), switchLinks.get(port.getId()));
@@ -152,9 +154,22 @@ public class Controller extends Node implements IControlPlane, IController,
 				if (port.getHost() != null) {
 					hosts.add(port.getHost());
 				}
+				for (long nodeId2 : this.nodes) {
+					Node node2 = allNodes.get(nodeId2);
+					for (Port port2 : node2.getPorts()) {
+						long realPortId1 = ManagementNetwork.getInstance().getVirtualPortIdMap().get(port.getId());
+						long realPortId2 = ManagementNetwork.getInstance().getVirtualPortIdMap().get(port2.getId());
+						// logger.info(">> " + realPortId1 + "-" + realPortId2);
+						if(switchLinks.containsKey(realPortId1)){
+							if(switchLinks.get(realPortId1) == realPortId2){
+								links.put(port.getId(), port2.getId());
+							}
+						}
+					}
+				}
 			}
 		}
-		Topology topology = new Topology(nodes, links, hosts);
+		Topology topology = new Topology(nodePorts, links, hosts);
 		return topology;
 	}
 
@@ -164,13 +179,23 @@ public class Controller extends Node implements IControlPlane, IController,
 	}
 
 	@Override
-	public Set<Port> getPorts() {
-		Set<Port> ports = new HashSet<Port>();
+	public List<Port> getPorts() {
+		this.ports = new TreeMap<Short, Port>();
 		for (Long nodeId : this.nodes) {
-			Node node = ManagementNetwork.getInstance().getNode(nodeId);
-			ports.addAll(node.getPorts());
-		}
-		return ports;
+			List<Port> swPorts = ManagementNetwork.getInstance()
+					.getNode(nodeId).getPorts();
+			for (Port swPort : swPorts) {
+				short portNum = (short) (this.ports.size()+1);
+				Port port = new Port(swPort);
+				long virtualPortId = PortUtil.calculatePortId(id, portNum);
+				port.setId(virtualPortId);
+				this.addPort(portNum, port);
+				long realPortId = ManagementNetwork.getInstance().getVirtualPortIdMap().get(swPort.getId());
+				// logger.info(virtualPortId + "-" + realPortId);
+				ManagementNetwork.getInstance().getVirtualPortIdMap().put(virtualPortId, realPortId);
+			}
+		}	
+		return super.getPorts();
 	}
 
 }

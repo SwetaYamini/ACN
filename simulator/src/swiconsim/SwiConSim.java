@@ -146,6 +146,11 @@ public class SwiConSim {
 		System.out.println(s2.toString());
 		System.out.println(h1.toString());
 		System.out.println(h2.toString());
+		
+		//for(long a : ManagementNetwork.getInstance().getVirtualPortIdMap().keySet()){
+		//	System.out.println(a + " " + ManagementNetwork.getInstance().getVirtualPortIdMap().get(a));
+		//}
+		
 	}
 	
 }
