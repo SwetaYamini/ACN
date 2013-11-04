@@ -15,6 +15,7 @@ import swiconsim.api.IControlPlane;
 import swiconsim.flow.Flow;
 import swiconsim.host.Host;
 import swiconsim.network.DataNetwork;
+import swiconsim.network.ManagementNetwork;
 import swiconsim.node.Node;
 import swiconsim.nwswitch.Switch;
 import swiconsim.nwswitch.port.Port;
@@ -29,8 +30,7 @@ import swiconsim.packet.Packet;
 public class Controller extends Node implements IControlPlane, IController,
 		IControllerSouthBound {
 	private static Logger logger = Logger.getLogger("sim:");
-	List<Long> switches;
-	ControllerControlPlane ccp;
+	List<Long> nodes;
 	ControllerSouthBound csb;
 
 	public Controller(long id, long cid) {
@@ -41,10 +41,9 @@ public class Controller extends Node implements IControlPlane, IController,
 	public Controller(long id) {
 		super(id);
 		this.id = id;
-		switches = new ArrayList<Long>();
-		ccp = new ControllerControlPlane(id, this);
-		csb = new ControllerSouthBound(id, switches, this);
-		registerWithMgmtNet();
+		nodes = new ArrayList<Long>();
+		csb = new ControllerSouthBound(id, nodes, this);
+		registerWithMgmtNetAsController();
 	}
 
 	@Override
@@ -52,35 +51,18 @@ public class Controller extends Node implements IControlPlane, IController,
 		return id;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see swiconsim.api.IControlPlane#addFlow(swiconsim.flow.Flow)
-	 */
 	@Override
 	public void addFlow(Flow flow) {
-		this.ccp.addFlow(flow);
+		for (Long swid : nodes) {
+			addFlowToSwitch(swid, flow);
+		}
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see swiconsim.api.IControlPlane#removeFlow(swiconsim.flow.Flow)
-	 */
 	@Override
 	public void removeFlow(Flow flow) {
-		this.ccp.removeFlow(flow);
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see swiconsim.api.IControlPlane#getPorts()
-	 */
-	@Override
-	public Set<Port> getPorts() {
-		// TODO Auto-generated method stub
-		return null;
+		for (Long swid : nodes) {
+			deleteFlowFromSwitch(swid, flow);
+		}
 	}
 
 	/*
@@ -93,16 +75,6 @@ public class Controller extends Node implements IControlPlane, IController,
 	public void sendPktInController(Packet pkt) {
 		// TODO Auto-generated method stub
 
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see swiconsim.api.IControlPlane#registerWithController(long)
-	 */
-	@Override
-	public void registerWithController(long cid) {
-		ccp.registerWithController(cid);
 	}
 
 	/*
@@ -128,16 +100,6 @@ public class Controller extends Node implements IControlPlane, IController,
 	@Override
 	public void receiveNotificationFromSwitch(Message msg) {
 		this.csb.receiveNotificationFromSwitch(msg);
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see swiconsim.api.IControllerSouthBound#registerWithMgmtNet()
-	 */
-	@Override
-	public void registerWithMgmtNet() {
-		this.csb.registerWithMgmtNet();
 	}
 
 	/*
@@ -170,28 +132,45 @@ public class Controller extends Node implements IControlPlane, IController,
 	@Override
 	public Topology getTopology() {
 		logger.info("Getting topology");
-		Set<Switch> switches = new HashSet<Switch>();
+		Set<Node> nodes = new HashSet<Node>();
 		Set<Host> hosts = new HashSet<Host>();
 		Map<Long, Long> links = new HashMap<Long, Long>();
-		Map<Long, Long> allLinks = DataNetwork.getInstance().getLinks();
-		Map<Long, Node> allSwitches = DataNetwork.getInstance().getSwMap();
-		for (long swid : this.switches) {
-			Node node = allSwitches.get(swid);
-			if (node instanceof Switch) {
-				Switch sw = (Switch) node;
-				switches.add(sw);
-				for (Port port : sw.getPorts()) {
-					if (allLinks.containsKey(port.getId())) {
-						links.put(port.getId(), allLinks.get(port.getId()));
-					}
-					if (port.getHost() != null) {
-						hosts.add(port.getHost());
-					}
+		Map<Long, Long> switchLinks = DataNetwork.getInstance().getLinks();
+		Map<Long, Long> contLinks = ManagementNetwork.getInstance().getLinks();
+		Map<Long, Node> allNodes = ManagementNetwork.getInstance().getNodeMap();
+		for (long nodeId : this.nodes) {
+			logger.info("Node : " + nodeId);
+			Node node = allNodes.get(nodeId);
+			nodes.add(node);
+			for (Port port : node.getPorts()) {
+				if (switchLinks.containsKey(port.getId())) {
+					links.put(port.getId(), switchLinks.get(port.getId()));
+				}
+				else if (contLinks.containsKey(port.getId())) {
+					links.put(port.getId(), contLinks.get(port.getId()));
+				}
+				if (port.getHost() != null) {
+					hosts.add(port.getHost());
 				}
 			}
 		}
-		Topology topology = new Topology(switches, links, hosts);
+		Topology topology = new Topology(nodes, links, hosts);
 		return topology;
+	}
+
+	@Override
+	public void registerWithMgmtNetAsController() {
+		ManagementNetwork.getInstance().registerController(id, this);
+	}
+
+	@Override
+	public Set<Port> getPorts() {
+		Set<Port> ports = new HashSet<Port>();
+		for (Long nodeId : this.nodes) {
+			Node node = ManagementNetwork.getInstance().getNode(nodeId);
+			ports.addAll(node.getPorts());
+		}
+		return ports;
 	}
 
 }

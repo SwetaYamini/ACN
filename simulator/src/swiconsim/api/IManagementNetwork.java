@@ -2,7 +2,7 @@ package swiconsim.api;
 
 import swiconsim.messages.Message;
 import swiconsim.controller.Controller;
-import swiconsim.nwswitch.Switch;
+import swiconsim.node.Node;
 
 /**
  * @author praveen
@@ -16,7 +16,7 @@ public interface IManagementNetwork {
 	 * @param id
 	 * @param sw
 	 */
-	void registerSwitch(long id, Switch sw);
+	void registerNode(long id, Node node);
 
 	/**
 	 * 

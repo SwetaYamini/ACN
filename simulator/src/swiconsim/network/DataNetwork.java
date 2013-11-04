@@ -21,7 +21,7 @@ public class DataNetwork implements IDataNetwork {
 	Map<Long, Long> links;
 	private static Logger logger = Logger.getLogger("sim:");
 
-	public Map<Long, Node> getSwMap() {
+	public Map<Long, Node> getNodeMap() {
 		return nodeMap;
 	}
 
@@ -48,8 +48,8 @@ public class DataNetwork implements IDataNetwork {
 	 * swiconsim.nwswitch.Switch)
 	 */
 	@Override
-	public void registerSwitch(long id, Switch sw) {
-		this.nodeMap.put(id, sw);
+	public void registerNode(long id, Node node) {
+		this.nodeMap.put(id, node);
 	}
 
 	/*

@@ -27,8 +27,19 @@ public class Port {
 		this.sw = sw;
 	}
 
+	public Port(Port swPort) {
+		this.id = swPort.id;
+		this.host = swPort.host;
+		this.sw = swPort.sw;
+		this.status = swPort.status;
+	}
+
 	public long getId() {
 		return id;
+	}
+	
+	public void setId(long id) {
+		this.id = id;
 	}
 
 	public PortStatus getStatus() {

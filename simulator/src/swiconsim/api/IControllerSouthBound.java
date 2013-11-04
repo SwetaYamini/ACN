@@ -27,5 +27,5 @@ public interface IControllerSouthBound {
 	/**
 	 * register controller on management network
 	 */
-	void registerWithMgmtNet();
+	void registerWithMgmtNetAsController();
 }

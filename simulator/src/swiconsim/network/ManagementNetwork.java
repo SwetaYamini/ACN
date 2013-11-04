@@ -8,6 +8,7 @@ import swiconsim.messages.Message;
 import swiconsim.api.IDataNetwork;
 import swiconsim.api.IManagementNetwork;
 import swiconsim.controller.Controller;
+import swiconsim.node.Node;
 import swiconsim.nwswitch.Switch;
 import swiconsim.packet.Packet;
 import swiconsim.util.PortUtil;
@@ -21,15 +22,16 @@ import swiconsim.util.PortUtil;
  */
 public class ManagementNetwork implements IManagementNetwork, IDataNetwork {
 	private static ManagementNetwork instance = null;
-	Map<Long, Switch> swMap;
-	Map<Long, Controller> contMap;
+	Map<Long, Node> nodeMap;
+	Map<Long, Controller> mgmtContMap;
 	private static Logger logger = Logger.getLogger("sim:");
 
 	Map<Long, Long> links;
 	
 	protected ManagementNetwork() {
-		swMap = new HashMap<Long, Switch>();
-		contMap = new HashMap<Long, Controller>();
+		nodeMap = new HashMap<Long, Node>();
+		mgmtContMap = new HashMap<Long, Controller>();
+		links = new HashMap<Long, Long>();
 	}
 
 	public static ManagementNetwork getInstance() {
@@ -47,8 +49,9 @@ public class ManagementNetwork implements IManagementNetwork, IDataNetwork {
 	 * swiconsim.nwswitch.Switch)
 	 */
 	@Override
-	public void registerSwitch(long id, Switch sw) {
-		this.swMap.put(id, sw);
+	public void registerNode(long id, Node node) {
+		logger.info("Registering node: " + id);
+		this.nodeMap.put(id, node);
 	}
 
 	/*
@@ -59,7 +62,8 @@ public class ManagementNetwork implements IManagementNetwork, IDataNetwork {
 	 */
 	@Override
 	public void registerController(long id, Controller cont) {
-		this.contMap.put(id, cont);
+		logger.info("Registering controller : " + id);
+		this.mgmtContMap.put(id, cont);
 	}
 
 	/*
@@ -73,8 +77,8 @@ public class ManagementNetwork implements IManagementNetwork, IDataNetwork {
 	public void sendNotificationToController(Message msg) {
 		logger.info(msg.getFrom() + "->" + msg.getTo() + " " + msg.getType());
 		long cid = msg.getTo();
-		if (contMap.containsKey(cid)) {
-			contMap.get(cid).receiveNotificationFromSwitch(msg);
+		if (mgmtContMap.containsKey(cid)) {
+			mgmtContMap.get(cid).receiveNotificationFromSwitch(msg);
 		} else {
 			logger.warning("Controller not found - " + cid);
 		}
@@ -91,8 +95,8 @@ public class ManagementNetwork implements IManagementNetwork, IDataNetwork {
 	public void sendNotificationToSwitch(Message msg) {
 		logger.info(msg.getFrom() + "->" + msg.getTo() + " " + msg.getType());
 		long swid = msg.getTo();
-		if (swMap.containsKey(swid)) {
-			swMap.get(swid).receiveNotificationFromController(msg);
+		if (nodeMap.containsKey(swid)) {
+			nodeMap.get(swid).receiveNotificationFromController(msg);
 		} else {
 			logger.warning("Switch not found - " + swid);
 		}
@@ -103,21 +107,21 @@ public class ManagementNetwork implements IManagementNetwork, IDataNetwork {
 	 * @return controller with given id
 	 */
 	public Controller getController(long cid) {
-		return contMap.get(cid);
+		return mgmtContMap.get(cid);
 	}
 
 	/**
-	 * @param swid
+	 * @param nodeId
 	 * @return switch with given id
 	 */
-	public Switch getSwitch(long swid) {
-		return swMap.get(swid);
+	public Node getNode(long nodeId) {
+		return nodeMap.get(nodeId);
 	}
 
 	@Override
-	public void addEdge(long swid1, short portNum1, long swid2, short portNum2) {
-		this.addEdge(PortUtil.calculatePortId(swid1, portNum1),
-				PortUtil.calculatePortId(swid2, portNum2));
+	public void addEdge(long nodeId1, short portNum1, long nodeId2, short portNum2) {
+		this.addEdge(PortUtil.calculatePortId(nodeId1, portNum1),
+				PortUtil.calculatePortId(nodeId2, portNum2));
 	}
 
 	@Override
@@ -136,5 +140,15 @@ public class ManagementNetwork implements IManagementNetwork, IDataNetwork {
 	public void pushPkt(Packet pkt, long portId) {
 		// TODO Auto-generated method stub
 		
+	}
+
+	@Override
+	public Map<Long, Node> getNodeMap() {
+		return this.nodeMap;
+	}
+
+	@Override
+	public Map<Long, Long> getLinks() {
+		return this.links;
 	}
 }

@@ -36,6 +36,12 @@ public interface IControlPlane {
 	 * @return
 	 */
 	Set<Port> getPorts();
+	
+	/**
+	 * @param portNum
+	 * @param port
+	 */
+	void addPort(short portNum, Port port);
 
 	/**
 	 * forward an in-pkt to controller
@@ -57,4 +63,9 @@ public interface IControlPlane {
 	 * @param msg
 	 */
 	void receiveNotificationFromController(Message msg);
+	
+	/**
+	 * 
+	 */
+	void registerWithMgmtNodeAsNode();
 }

@@ -1,15 +1,11 @@
 package swiconsim.nwswitch;
 
 import java.util.HashMap;
-import java.util.Set;
-
-import swiconsim.messages.Message;
 import swiconsim.api.IControlPlane;
 import swiconsim.api.ISwitchDataPlane;
 import swiconsim.flow.Flow;
 import swiconsim.host.Host;
 import swiconsim.network.DataNetwork;
-import swiconsim.network.ManagementNetwork;
 import swiconsim.node.Node;
 import swiconsim.nwswitch.port.Port;
 import swiconsim.nwswitch.port.PortStatus;
@@ -23,10 +19,8 @@ import swiconsim.util.PortUtil;
  */
 public class Switch extends Node implements IControlPlane, ISwitchDataPlane {
 
-	SwitchControlPlane cp;
 	SwitchDataPlane dp;
 	
-	private HashMap<Short, Port> ports;
 	private FlowTable flowTable;
 
 	public Switch(long id) {
@@ -46,10 +40,8 @@ public class Switch extends Node implements IControlPlane, ISwitchDataPlane {
 			Port port = new Port(PortUtil.calculatePortId(id, i), PortStatus.UP, this);
 			ports.put(i, port);
 		}
-
-		cp = new SwitchControlPlane(id, ports, flowTable);
+		
 		dp = new SwitchDataPlane(id, ports, flowTable);
-		registerWithMgmtNet();
 		registerWithDataNet();
 	}
 
@@ -59,25 +51,20 @@ public class Switch extends Node implements IControlPlane, ISwitchDataPlane {
 	}
 
 	@Override
-	public void addFlow(Flow flow) {
-		cp.addFlow(flow);
+	public void addFlow(Flow f) {
+		flowTable.addFlowEntry(f);
 	}
 
 	@Override
-	public void removeFlow(Flow flow) {
-		cp.removeFlow(flow);
-	}
-
-	@Override
-	public Set<Port> getPorts() {
-		return cp.getPorts();
+	public void removeFlow(Flow f) {
+		flowTable.removeFlowEntry(f);
 	}
 
 	@Override
 	public boolean receivePkt(Packet pkt, short in_port) {
 		boolean isProcessed = dp.receivePkt(pkt, in_port);
 		if (!isProcessed) {
-			cp.sendPktInController(pkt);
+			sendPktInController(pkt);
 		}
 		return true;
 	}
@@ -87,32 +74,14 @@ public class Switch extends Node implements IControlPlane, ISwitchDataPlane {
 		dp.sendPkt(pkt, out_port);
 	}
 
-	@Override
-	public void sendPktInController(Packet pkt) {
-		cp.sendPktInController(pkt);
-	}
-
-	@Override
-	public void registerWithController(long cid) {
-		cp.registerWithController(cid);
-	}
-
-	public void registerWithMgmtNet() {
-		ManagementNetwork.getInstance().registerSwitch(id, this);
-	}
-
 	public void registerWithDataNet() {
-		DataNetwork.getInstance().registerSwitch(id, this);
+		DataNetwork.getInstance().registerNode(id, this);
 	}
 
-	@Override
-	public void receiveNotificationFromController(Message msg) {
-		cp.receiveNotificationFromController(msg);
-	}
-
+	
 	@Override
 	public String toString() {
-		String ret = "Switch [id=" + id + ",  controller=" + cp.cid + ", ports={";
+		String ret = "Switch [id=" + id + ",  controller=" + cid + ", ports={";
 		for (Port port : ports.values()) {
 			ret += port.getId() + ", ";
 		}

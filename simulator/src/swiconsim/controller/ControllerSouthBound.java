@@ -1,6 +1,7 @@
 package swiconsim.controller;
 
 import java.util.List;
+import java.util.Set;
 import java.util.logging.Logger;
 
 import swiconsim.api.IControllerSouthBound;
@@ -8,13 +9,18 @@ import swiconsim.flow.Flow;
 import swiconsim.messages.Message;
 import swiconsim.messages.MessageType;
 import swiconsim.network.ManagementNetwork;
+import swiconsim.nwswitch.Switch;
+import swiconsim.nwswitch.port.Port;
+import swiconsim.util.PortUtil;
 
 public class ControllerSouthBound implements IControllerSouthBound {
 	private static Logger logger = Logger.getLogger("sim:");
 	List<Long> switches;
 	long id;
 	Controller controller;
-	public ControllerSouthBound(long id, List<Long> switches, Controller controller) {
+
+	public ControllerSouthBound(long id, List<Long> switches,
+			Controller controller) {
 		super();
 		this.id = id;
 		this.switches = switches;
@@ -35,6 +41,16 @@ public class ControllerSouthBound implements IControllerSouthBound {
 			long switchId = (Long) msg.getPayload();
 			logger.info(this.id + "Hello from " + switchId);
 			switches.add(switchId);
+			// add its ports to controller's ports
+			/*Set<Port> swPorts = ((Switch) (ManagementNetwork.getInstance()
+					.getNode(switchId))).getPorts();
+			for (Port swPort : swPorts) {
+				short portNum = (short) this.controller.getPorts().size();
+				Port port = new Port(swPort);
+				port.setId(PortUtil.calculatePortId(id, portNum));
+				this.controller.addPort(portNum, port);
+			}
+			*/
 			break;
 		default:
 			break;
@@ -66,7 +82,7 @@ public class ControllerSouthBound implements IControllerSouthBound {
 	}
 
 	@Override
-	public void registerWithMgmtNet() {
+	public void registerWithMgmtNetAsController() {
 		ManagementNetwork.getInstance().registerController(id, this.controller);
 	}
 

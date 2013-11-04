@@ -4,6 +4,7 @@ import java.util.Map;
 import java.util.Set;
 
 import swiconsim.host.Host;
+import swiconsim.node.Node;
 import swiconsim.nwswitch.Switch;
 
 /**
@@ -12,13 +13,13 @@ import swiconsim.nwswitch.Switch;
  *         Topology - seen by a controller
  */
 public class Topology {
-	Set<Switch> switches;
+	Set<Node> nodes;
 	Map<Long, Long> edges;
 	Set<Host> hosts;
 
-	public Topology(Set<Switch> switches, Map<Long, Long> edges, Set<Host> hosts) {
+	public Topology(Set<Node> nodes, Map<Long, Long> edges, Set<Host> hosts) {
 		super();
-		this.switches = switches;
+		this.nodes = nodes;
 		this.edges = edges;
 		this.hosts = hosts;
 	}
@@ -27,7 +28,7 @@ public class Topology {
 	public String toString() {
 		String ret = "Topology [Switches={";
 
-		for (Switch sw : switches) {
+		for (Node sw : nodes) {
 			ret += sw.getId() + ", ";
 		}
 		ret += "} , Edges=\n";

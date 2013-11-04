@@ -1,6 +1,8 @@
 package swiconsim.api;
 
-import swiconsim.nwswitch.Switch;
+import java.util.Map;
+
+import swiconsim.node.Node;
 import swiconsim.packet.Packet;
 
 /**
@@ -17,7 +19,7 @@ public interface IDataNetwork {
 	 * @param id
 	 * @param sw
 	 */
-	void registerSwitch(long id, Switch sw);
+	void registerNode(long id, Node node);
 
 	/**
 	 * 
@@ -53,5 +55,16 @@ public interface IDataNetwork {
 	 * @param portId
 	 */
 	void pushPkt(Packet pkt, long portId);
+	
+	/**
+	 * @return
+	 */
+	Map<Long, Node> getNodeMap();
+	
+	/**
+	 * @return
+	 */
+	Map<Long, Long> getLinks();
+	
 
 }
