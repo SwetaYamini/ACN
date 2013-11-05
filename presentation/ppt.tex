@@ -124,11 +124,15 @@
 
 \frame{
 \frametitle{Network Aggregation}
-	\begin{itemize}
-		\item Share a condensed view of the network: A Network flow table
-		\item Surpress network events such that aggregated network does not change: Reduce communication overhead
-		\item Convert flow addtion/removal commands on aggregated network to actual network in an efficient way
-
+	\begin{itemize}		
+		\item Definition - Create and publish one flow table (referred to as $nflow$) for a given network. (1) Support addition of flows to $nflow$ efficiently. (2) Handle intra-link failure efficiently, in such a way that $nflow$  does not change.
+		\item $nflow$ schema $(port in, flow in, port out, flow out, priority, attributes)$
+		\item Data structures\footnote{code @ https://github.com/MugiwaraLuffy/ACN/tree/master/simulator/src/graph}:
+		\begin{itemize}
+			\item Add $external$ $nodes$ to the network graph $G$
+			\item Flow graphs: For each external node, $e$, we create/maintain a directed flow graph, $f_e$ as an overlay graph on $G$, rooted at $e$, which is the source. End host and other external nodes acts as sink. The flow in $f_e$ are divided at nodes among the incident links according to the flow tables at corresponding routers.
+			\item Other data structures include: Path array, Link array 
+		\end{itemize} 		
 	\end{itemize}
 }
 
