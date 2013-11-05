@@ -99,8 +99,8 @@
 	\end{itemize}
 	\item We are trying to study		
 	\begin{itemize}
-		\item Instead of using a general repilication mechanism, can we exploit the fact that network views are being replicated ?
-		\item Could the SDN datapath (replication client) make use of replication timestamps ?
+		\item Instead of just using a general repilication mechanism, can we exploit the fact that network views are being replicated ?
+		\item Could SDN datapath (replication client) make use of replication timestamps ?
 	\end{itemize}
 	
 	
@@ -134,10 +134,14 @@
 
 \frame{
 \frametitle{Timestamp}
-	\begin{itemize}   
-		\item Handle domain level inconsistencies in Domain Network
-		\item Each domain i maintains a vector timestamp, conistsing of revision number of domains
-		\item Border routers in a domain may change a flow depending on it's timestamp
+	\begin{itemize}
+		\item An example - Link Balancer Controller [4]
+		\item On a flow arriving at an ingress port, a path with minimum maximum utilization is choosen
+		\item Each domain i maintains a vector timestamp, conistsing of revision number of domains' link utilizations, seen so far
+		\item When a flow path is set up at a domain, it is augmented by the timestamp of the domain
+		\item Border routers in a domain may change a flow path if their timestamp is greater than flow's timestamp
+		\item Flow's timestamp is updated as it passes through domains
+		\item what if flow's timestamp is neither greater nor smaller than domain's timestamp ?
 	\end{itemize}   
 }
 
@@ -158,22 +162,57 @@
 
 \section{What next ?}
 
+
+
+\frame{
+\frametitle{Hitches}
+\begin{itemize}
+	\item Hierarchical Architecture
+	\begin{itemize}
+		\item Suboptimal performance
+	\end{itemize}
+	\item Network Aggregation
+	\begin{itemize}
+		\item May backfire: single internal update may cause multiple updates in aggregated network 
+	\end{itemize}
+	\item Timestamps
+	\begin{itemize}
+		\item Not a true datapath technique
+		\item Improve the performance of control applications, however, does not provide any guarantees
+	\end{itemize}
+\end{itemize}	
+}
+
 \frame{
 \frametitle{Future Work}
 \begin{itemize}
-	\item 
-	\item Implement using OpenFlow
+	\item Understand the trade-off between sub-optimality and frequency of updates, in case of hierarchical architecture
+	\item Revise Network Aggregation data structures so as not to explode network updates
+	\item Implement and simulate each approach on real ISP topology with real traffic data. Analyze performance
 \end{itemize}
 }
 
 \frame{
-	\frametitle{Hiccups}
-
+\centerline{Thank you!}
 }
 
 \frame{
-\centerline{Thank you!}
-Suggestions and Questions are welcome, suggestions a little more than questions
+\frametitle{References}
+\begin{itemize}
+\item [1] T. Koponen, M. Casado, N. Gude, J. Stribling, L. Poutievski, M. Zhu, R. Ramanathan, Y. Iwata, H. Inoue, T. Hama, and S. Shenker. Onix: a distributed control platform for large-scale production networks. In Proceedings of the 9th USENIX OSDI conference , pages 1 - 6, 2010.
+\item [2] A. Tootoonchian and Y. Ganjali. Hyperflow: a distributed control plane for openflow. In Proceedings of the 2010 INM conference, 2010.
+\item [3] Soheil Hassas Yeganeh and Yashar Ganjali. Kandoo: a framework for efficient and scalable offloading of control applications. In Proc. 1st Workshop on Hot Topics in Software Defined Networking (HotSDN 2012), pages 19-24, New York, 2012. ACM Press. 
+\item [4] D. Levin, A. Wundsam, B.Heller, N. Handigol, and A. Feldmann, Logically Centralized State Distribution Trade-offs in Software Defined Networks  in HotSDN, 2012. 
+\end{itemize}
+}
+
+\frame{
+\begin{itemize}
+\frametitle{References}
+\item [5] Stefan Schmid and Jukka Suomela, Exploiting Locality in Distributed SDN Control, in HotSDN, 2013. 
+\item [6] Advait Dixit, Fang Hao, Sarit Mukherjee, T. V. Lakshman and Ramana Kompella, Towards an Elastic Distributed SDN Controller, in HotSDN, 2013.
+\item [7] Nate Foster, Rob Harrison, Matthew L. Meola, Michael J. Freedman, Jennifer Rexford and David Walker, Frenetic: A High-Level Language for OpenFlow Networks. ACM PRESTO 2010.
+\end{itemize}
 }
 
 \end{document} 
