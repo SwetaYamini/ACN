@@ -24,7 +24,7 @@
 \tableofcontents
 }
 
-\section{Introduction}
+\section{Introduction and Related Work}
 
 \frame{
 \frametitle{Problem}
@@ -87,18 +87,29 @@
 \end{itemize}
 }
 
-\section{Approach}
+\section{Approach and Progress}
 
 \frame{
-\frametitle{What }
+\frametitle{Our Approach}
 \begin{itemize}
-	\item
+\item What is being done ? 
+	\begin{itemize}
+		\item It's a Replicated state machine (strong or lazy replication) architecture, which had been well studied in Distributed Systems community
+		\item Past work uses DHTs (Onix), Transactional DB (Onix), DFS (Hyperflow)
+	\end{itemize}
+	\item We are trying to study		
+	\begin{itemize}
+		\item Instead of using a general repilication mechanism, can we exploit the fact that network views are being replicated ?
+		\item Could the SDN datapath (replication client) make use of replication timestamps ?
+	\end{itemize}
+	
+	
 \end{itemize}
 }
 
 
 \frame{
-\frametitle{Our Approach}
+\frametitle{Hierarchical Architecture}
 \begin{itemize}
 	\item Hierarchical Architecture
 	\begin{itemize}
@@ -106,36 +117,28 @@
 		\item Each controller behaves as a giant openflow switch for parent controller (Network Aggregation)
 		\item Controller translates OFP commands and network updates between parent controller and underlying networks
 	\end{itemize}
-	\item Network Aggregation
+\end{itemize}
+}
+
+
+
+\frame{
+\frametitle{Network Aggregation}
 	\begin{itemize}
 		\item Share a condensed view of the network: A Network flow table
 		\item Surpress network events such that aggregated network does not change: Reduce communication overhead
 		\item Convert flow addtion/removal commands on aggregated network to actual network in an efficient way
+
 	\end{itemize}
-	\item Timestamp: 
-		\item Handle domain level inconsistencies in "SDN Datapath" (Domain Network)
-		\item Each domain i maintains a vector timestamp T_i[1...n] 
-		\item (Routers in) A Domain may change flow depending on their timestamps
-	\end{itemize}   
-\end{itemize}
-}
-
-
-
-\section{Progress}
-
-\frame{
-\frametitle{Network Aggregation}
-\begin{itemize}
-	\item
-\end{itemize}
 }
 
 \frame{
 \frametitle{Timestamp}
-\begin{itemize}
-	\item
-\end{itemize}
+	\begin{itemize}   
+		\item Handle domain level inconsistencies in Domain Network
+		\item Each domain i maintains a vector timestamp, conistsing of revision number of domains
+		\item Border routers in a domain may change a flow depending on it's timestamp
+	\end{itemize}   
 }
 
 \frame{
