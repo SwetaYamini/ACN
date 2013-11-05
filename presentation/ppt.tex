@@ -100,7 +100,23 @@
 \frame{
 \frametitle{Our Approach}
 \begin{itemize}
-	\item
+	\item Hierarchical Architecture
+	\begin{itemize}
+		\item Controllers' view do not span the whole network, but only the 'underlying network'
+		\item Each controller behaves as a giant openflow switch for parent controller (Network Aggregation)
+		\item Controller translates OFP commands and network updates between parent controller and underlying networks
+	\end{itemize}
+	\item Network Aggregation
+	\begin{itemize}
+		\item Share a condensed view of the network: A Network flow table
+		\item Surpress network events such that aggregated network does not change: Reduce communication overhead
+		\item Convert flow addtion/removal commands on aggregated network to actual network in an efficient way
+	\end{itemize}
+	\item Timestamp: 
+		\item Handle domain level inconsistencies in "SDN Datapath" (Domain Network)
+		\item Each domain i maintains a vector timestamp T_i[1...n] 
+		\item (Routers in) A Domain may change flow depending on their timestamps
+	\end{itemize}   
 \end{itemize}
 }
 
@@ -109,7 +125,14 @@
 \section{Progress}
 
 \frame{
-\frametitle{Progress}
+\frametitle{Network Aggregation}
+\begin{itemize}
+	\item
+\end{itemize}
+}
+
+\frame{
+\frametitle{Timestamp}
 \begin{itemize}
 	\item
 \end{itemize}
@@ -130,6 +153,8 @@
 
 }
 
+\section{What next ?}
+
 \frame{
 \frametitle{Future Work}
 \begin{itemize}
@@ -139,7 +164,13 @@
 }
 
 \frame{
+	\frametitle{Hiccups}
+
+}
+
+\frame{
 \centerline{Thank you!}
+Suggestions and Questions are welcome, suggestions a little more than questions
 }
 
 \end{document} 
