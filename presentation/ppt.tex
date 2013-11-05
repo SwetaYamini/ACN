@@ -62,7 +62,7 @@
 \pause
 	\begin{itemize}
 		\item Flat distributed controller architecture
-		\item Appliations are agnostic to underlying state distribution
+		\item Applications are agnostic to underlying state distribution
 		\item Provides a logically centralized global view of the network
 		\item Results in performance degradation and transient inconsistencies
 	\end{itemize}
@@ -99,7 +99,7 @@
 	\end{itemize}
 	\item We are trying to study		
 	\begin{itemize}
-		\item Instead of just using a general repilication mechanism, can we exploit the fact that network views are being replicated ?
+		\item Instead of just using a general replication mechanism, can we exploit the fact that network views are being replicated ?
 		\item Could SDN datapath (replication client) make use of replication timestamps ?
 	\end{itemize}
 	
@@ -148,7 +148,7 @@
 \frametitle{Timestamp}
 	\begin{itemize}
 		\item An example - Link Balancer Controller [4]
-		\item On a flow arriving at an ingress port, a path with minimum maximum utilization is choosen
+		\item On a flow arriving at an ingress port, a path with minimum maximum utilization is chosen
 		\item Each domain $i$ maintains a vector timestamp, $T_{i}[1...n]$. $T_{i}[j]$ contains the latest revision number of domain $j$ link utilizations, seen by domain $i$
 		\item Each router in a domain is updated with domain's timestamp
 		\item When a flow path is being set up at domain $j$, it is augmented by the $T_{j}$
