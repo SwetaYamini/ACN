@@ -120,13 +120,13 @@
 \frame{
 \frametitle{Simulation}
 \begin{itemize}
-	\item Wrote a simulator to simulate a hierarchical controller architecture\footnote{code @ https://github.com/MugiwaraLuffy/ACN/tree/master/simulator/src/graph}
-	\item A minimal API for control plane, data plane, controller behavior, etc have been defined
-	\item A $Node$ is an element in the network which implements a control plane interface 
+	\item Wrote a simulator to simulate a hierarchical controller architecture\footnote{code @ https://github.com/MugiwaraLuffy/ACN/tree/master/simulator/src/swiconsim}
+	\item A minimal set of APIs for control plane, data plane, controller behavior, etc has been defined
+	\item A $Node$ is an element in the management network which implements $IControlPlane$ interface 
 	\item A $Switch$ extends a $Node$ and contains a data plane
-	\item A $Controller$ extends a $Node$ and implements standard controller API
+	\item A $Controller$ extends a $Node$ and implements standard controller APIs
 	\item $DataNetwork$ contains all the switches which handle actual data packets
-	\item $ControlNetwork$ contains hierarchical layers of controllers
+	\item A $Controller$ controls a $Node$ which could be a $Switch$ or another $Controller$
 \end{itemize}
 }
 
