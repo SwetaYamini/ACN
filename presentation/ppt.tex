@@ -137,11 +137,12 @@
 	\begin{itemize}
 		\item An example - Link Balancer Controller [4]
 		\item On a flow arriving at an ingress port, a path with minimum maximum utilization is choosen
-		\item Each domain i maintains a vector timestamp, conistsing of revision number of domains' link utilizations, seen so far
-		\item When a flow path is set up at a domain, it is augmented by the timestamp of the domain
-		\item Border routers in a domain may change a flow path if their timestamp is greater than flow's timestamp
-		\item Flow's timestamp is updated as it passes through domains
-		\item what if flow's timestamp is neither greater nor smaller than domain's timestamp ?
+		\item Each domain $i$ maintains a vector timestamp, $T_{i}[1...n]$. $T_{i}[j]$ contains the latest revision number of domain $j$ link utilizations, seen by domain $i$
+		\item Each router in a domain is updated with domain's timestamp
+		\item When a flow path is being set up at domain $j$, it is augmented by the $T_{j}$
+		\item When a router in a domain $i$ receives a flow with timestamp $T_{j}$, it may change part of flow's path if $T_{j}[i] < T_{i}[i]$ 
+		\item Flow's timestamp is updated as $max\{T_{j}[k], T_{i}[k]\}$ , $k=1...n$ 
+		\item OK, can we do better ? Yes!, a domain can change the entire flow's path according to timestamps.
 	\end{itemize}   
 }
 
