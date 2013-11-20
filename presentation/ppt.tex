@@ -107,28 +107,20 @@
 \end{itemize}
 }
 
+
 \frame{
 \frametitle{Hierarchical Architecture}
 \begin{itemize}
-	\item Controllers' view do not span the whole network, but only the 'underlying network'
-	\item A controller behaves as an openflow switch for parent controller (Network Aggregation) and as a controller for its underlying network
-	\item Controller translates OFP commands and network updates between parent controller and underlying networks
-	\item Control applications run on each controller to set the network parameters in its underlying network
+	\item Hierarchical Architecture
+	\begin{itemize}
+		\item Controllers' view do not span the whole network, but only the 'underlying network'
+		\item Each controller behaves as a giant openflow switch for parent controller (Network Aggregation)
+		\item Controller translates OFP commands and network updates between parent controller and underlying networks
+	\end{itemize}
 \end{itemize}
 }
 
-\frame{
-\frametitle{Simulation}
-\begin{itemize}
-	\item Wrote a simulator to simulate a hierarchical controller architecture\footnote{code @ https://github.com/MugiwaraLuffy/ACN/tree/master/simulator/src/swiconsim}
-	\item A minimal set of APIs for control plane, data plane, controller behavior, etc has been defined
-	\item A $Node$ is an element in the management network which implements $IControlPlane$ interface 
-	\item A $Switch$ extends a $Node$ and contains a data plane
-	\item A $Controller$ extends a $Node$ and implements standard controller APIs
-	\item $DataNetwork$ contains all the switches which handle actual data packets
-	\item A $Controller$ controls a $Node$ which could be a $Switch$ or another $Controller$
-\end{itemize}
-}
+
 
 \frame{
 \frametitle{Network Aggregation}
