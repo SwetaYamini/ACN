@@ -1,0 +1,74 @@
+\title{Hierarchical Controller Architecture in Software Defined Networks}
+\author{
+        Author 1 \\
+        UIUC\\
+            \and
+        Author 2\\
+        UIUC\\
+}
+\date{\today}
+
+\documentclass[10pt, twocolumn]{article}
+
+\begin{document}
+\maketitle
+\begin{abstract}
+Network control plane, in Software Defined Networks (SDN), provides a global view of physical network to control applications (such as routing), which can be developed as a centralized application rather than a distributed one. Regardless of this abstraction, the control plane itself must inevitably be a distributed system, with multiple nodes called controllers, to achieve desired level of scalability, reliability and responsiveness. 
+
+Traditional architecture involves multiple controllers, each operating on a subset of switches and maintaining a global view of entire network. We propose a different where controllers are arranged in a hierarchy and only maintain a part of network view. This improves responsiveness and reduces inconsistency ........(numbers).
+
+Besides, we also propose an optimization in traditional controller architecture. We show 
+\end{abstract}
+
+\section{Introduction}
+Forwarding or data plane consists of a collection of forwarding elements (switches), connected to form a network, which is inherently distributed in nature. Control plane consists of a collection of control elements, which install forwarding rules on forwarding elements as dictated by control logic or application, running on control elements. Some classes of control application are routing, traffic engineering (TE) and enforcing network policies. In traditional network, there is a tight coupling and one to one mapping between control elements and forwarding elements, with one pair on each switch. Besides, the role of control elements had been trivial, which is to merely install instructions given by control application on corresponding forwarding element as forwarding rules. It is the control application which runs distributed protocol to synchronize the state of forwarding elements. The design of these distributed protocols differs from application to application. For example, link state routing makes switches share their neighbors while distance vector routing makes switches share their routing tables.
+
+The emergence of Software Defined Network (SDN) has induced a separation between forwarding and control elements and has significantly improved the role of control plane. The control element may no longer be present on the switch but move to a separate device called controller, and uses predefined protocol such as OpenFlow [openflow-ref], to install forwarding rules. There may be a one-to-many mapping from controllers to switches. At one extreme, control plane may provide control application with global network view, which can then be implemented as a centralized application, rather than a distributed one. Regardless of this abstraction, the control plane itself must inevitably be a distributed system, with multiple controllers, to achieve desired level of scalability, reliability and responsiveness.                    
+
+Conventional control plane architecture involves multiple controllers, where each controller operates on a subset of switches and maintains a global view of the entire network, which is exposed to the control application. Instructions (forwarding rules) from control application are sent to target switches directly or through other controllers. Underlying network state is shared with other controllers through distributed state dissemination frameworks such as distributed transactional databases or Distributed Hash Tables (DHT). Consequently, this introduces trade-off between network state inconsistency and responsiveness. Results from [logically-centralized-ref] suggests that control state inconsistency significantly degrades performance of logically centralized control applications agnostic to the underlying state distribution. 
+
+The state inconsistency problem arises from the fact that each controller try to maintain the complete global view of network. Besides, we believe it is difficult (from scalability point of view) for a controller (a COTS machine) to handle the entire network view. Motivated by these observation, we propose a hierarchical controller architecture. We show ....................   
+ 
+
+\paragraph{Outline}
+The remainder of this article is organized as follows. Section~\ref{sec:hierarchical} presents Hierarchical Controller Architecture. We present the experimental results in section~\ref{sec:eval}. In section~\ref{sec:timestamps}, we present an optimization to conventional controller architecture to help improve the performance of application even if states between controllers is inconsistent. Related work is presented in section~\ref{sec:related}. We discuss ............Our new and exciting results are described in Section~\ref{results}.
+
+
+\section{Hierarchical Controller Architecture}
+\label{sec:hierarchical}
+We propose a control plane architecture in which controllers are arranged in the form of a tree over the physical network. Switches form the leaf nodes in the tree, while controllers form the internal nodes. An internal node acts as a switch for it's parent and acts as a controller for it's children. A node aggregate it's children network and converts it to a switch abstraction which is then exposed to the parent controller. This switch abstraction is explained in detail in section~\ref{subsec:aggr}. A controller's view does not span the whole network but only the network of it's children. A node translates instructions (forwarding rules) from it's parent controller into forwarding rules for it's underlying network. Similarly, network updates from the underlying network are translated into network updates arising from one switch abstraction of the given controller and are passed on to parent controller. The translation process is explained in the following section. 
+
+\subsection{One switch abstraction}
+\label{subsec:aggr}
+      
+
+\subsection{An example}
+\label{example}
+Let's consider an example to understand the benefits of hierarchical architecture. Let there be a TE control application running on $d$ controllers, with each controller operating on $d$ switches. Network state consists of current utilizations of all links. Whenever a new flow arrives, application choses a path with minimum maximum utilization and assigns it to the flow. Each time a path of length $l$ is assigned to the flow, there could be a maximum of $l*d$ link utilization updates and $l$ forwarding rule messages to be sent between controllers. Now, consider an architecture where controllers are arranged in hierarchical manner. There are $d+1$ controllers. The first $d$ controllers (called type 0) maintain $d$ switches each and acts as a switch to the last controller (called type 1), which in turn maintains the other $d$ controllers. Type 0 controllers keep track of link utilizations only for the links that connect it's children switches. Type 1 controller keep track of links that runs from switches belonging to one controller domain to another. Same TE control application runs on each controller. When a new flow arrives, a switch sends $packet_in$ message to it's type 0 controller. Type 0 controller checks if the path of the flow belongs entirely to it's underlying network or not. If yes, it uses TE application to assign the path to the flow and no updates are sent to any controller. However, if the destination is outside it's domain, type 0 controller sends a $packet_in$ message to it's parent controller. Parent controller uses TE control application to assign a paths of type 0 controllers. Forwarding rules are sent to type 0 controllers, which in turn sets up forwarding rules in their network. If the path length is $l$, there will be a maximum of $l+1$ forwarding rule messages between controllers and no link utilization updates. This significant reduction in communication overhead comes at the cost of sub-optimality in the application performance. We show experimentally that the proposed architecture significantly reduces communication overhead while only modestly degrading application performance in the next section.
+
+\section{Evaluation}
+\label{sec:eval}
+In this section we describe the results.
+
+\section{Timestamps}
+\label{sec:timestamps}
+We worked hard, and achieved very little.
+
+\section{Discussion}
+\label{sec:discuss}
+
+\section{Related Work}
+\label{sec:related}
+
+\section{Conclusion}
+\label{sec:conc}
+
+\section{Acknowledgements}
+\label{sec:ack}
+
+\bibliographystyle{abbrv}
+\bibliography{main}
+
+\end{document}
+This is never printed
+  
