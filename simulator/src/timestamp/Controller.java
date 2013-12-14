@@ -128,7 +128,7 @@ public class Controller extends Thread {
 				path.remove(path.size()-1);
 			}
 		}
-		visited.remove(sw);
+		//visited.remove(sw);
 	}
 	
 	public void getBestIntraPath(int sw1, int sw2){		
@@ -166,7 +166,7 @@ public class Controller extends Thread {
 				path.remove(path.size()-1);
 			}
 		}
-		visited.remove(sw);
+		//visited.remove(sw);
 	}
 	
 	int updateUtilizations(Flow flow, ArrayList<FlowLink> path, int start, int end){
@@ -225,6 +225,10 @@ public class Controller extends Thread {
 			first=0;
 		}
 		return ret+"]";
+	}
+	
+	public static void main(String[] args){
+		
 	}
 	
 }

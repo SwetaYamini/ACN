@@ -2,6 +2,7 @@ package swiconsim.api;
 
 import java.util.Map;
 
+import swiconsim.link.Link;
 import swiconsim.node.Node;
 import swiconsim.packet.Packet;
 
@@ -30,7 +31,7 @@ public interface IDataNetwork {
 	 * @param swid2
 	 * @param portNum2
 	 */
-	void addEdge(long swid1, short portNum1, long swid2, short portNum2);
+	void addEdge(long swid1, short portNum1, long swid2, short portNum2, int capacity);
 
 	/**
 	 * add an edge by portid
@@ -38,7 +39,7 @@ public interface IDataNetwork {
 	 * @param portId1
 	 * @param portId2
 	 */
-	void addEdge(long portId1, long portId2);
+	void addEdge(long portId1, long portId2, int capacity);
 
 	/**
 	 * pkt coming into data network through portid
@@ -64,7 +65,7 @@ public interface IDataNetwork {
 	/**
 	 * @return
 	 */
-	Map<Long, Long> getLinks();
+	Map<Long, Link> getLinks();
 	
 
 }

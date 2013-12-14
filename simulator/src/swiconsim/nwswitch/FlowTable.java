@@ -29,23 +29,24 @@ public class FlowTable {
 	/**
 	 * @param flowEntries
 	 */
-	public FlowTable(Map<Flow, FlowCounter> flowEntries) {
+	/*public FlowTable(Map<Flow, FlowCounter> flowEntries) {
 		super();
 		this.flowEntries = flowEntries;
-	}
+	}*/
 
 	public Map<Flow, FlowCounter> getFlowEntries() {
 		return flowEntries;
 	}
 
-	public void setFlowEntries(Map<Flow, FlowCounter> flowEntries) {
+	/*public void setFlowEntries(Map<Flow, FlowCounter> flowEntries) {
 		this.flowEntries = flowEntries;
-	}
+	}*/
 
 	/**
 	 * @param flow
 	 */
 	public void addFlowEntry(Flow flow) {
+		//System.out.println("Adding flow " + flow.toString());
 		this.flowEntries.put(flow, new FlowCounter());
 	}
 

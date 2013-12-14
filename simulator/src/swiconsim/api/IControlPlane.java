@@ -25,7 +25,7 @@ public interface IControlPlane {
 	 * 
 	 * @param flow
 	 */
-	void addFlow(Flow flow);
+	void addFlow(Flow flow, Packet packet);
 
 	/**
 	 * remove
@@ -43,7 +43,7 @@ public interface IControlPlane {
 	 * @param portNum
 	 * @param port
 	 */
-	void addPort(short portNum, Port port);
+	void addPort(long portNum, Port port);
 
 	/**
 	 * forward an in-pkt to controller

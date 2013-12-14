@@ -7,8 +7,8 @@ package swiconsim.flow;
  */
 public class Action {
 	ActionType type;
-	int value;
-	public Action(ActionType type, int value) {
+	long value;
+	public Action(ActionType type, long value) {
 		super();
 		this.type = type;
 		this.value = value;
@@ -19,10 +19,10 @@ public class Action {
 	public void setType(ActionType type) {
 		this.type = type;
 	}
-	public int getValue() {
+	public long getValue() {
 		return value;
 	}
-	public void setValue(int value) {
+	public void setValue(long value) {
 		this.value = value;
 	}
 	

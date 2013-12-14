@@ -11,7 +11,7 @@ import swiconsim.util.IPUtil;
  */
 public class Match {
 	/** Input switch port */
-    public short in_port = 0;
+    public long in_port = 0;
 
     /** IP source address */
     public int nw_src = 0;
@@ -32,7 +32,7 @@ public class Match {
      * @param nw_dst
      *  
      */
-	public Match(short in_port, int nw_src, int nw_dst) {
+	public Match(long in_port, int nw_src, int nw_dst) {
 		super();
 		this.in_port = in_port;
 		this.nw_src = nw_src;
@@ -45,7 +45,7 @@ public class Match {
 		super();
 		switch(field){
 		case IN_PORT:
-			this.in_port = (short) value;
+			this.in_port = (long) value;
 			break;
 		case SRC:
 			this.nw_src = value;
@@ -60,7 +60,7 @@ public class Match {
 		}
 	}
 
-	public Match(short in_port, int nw_src, int nw_src_mask, int nw_dst,
+	public Match(long in_port, int nw_src, int nw_src_mask, int nw_dst,
 			int nw_dst_mask) {
 		super();
 		this.in_port = in_port;
@@ -70,11 +70,19 @@ public class Match {
 		this.nw_dst_mask = nw_dst_mask;
 	}
 
-	public short getIn_port() {
+	public Match(Match match) {
+		this.in_port = match.in_port;
+		this.nw_src = match.nw_src;
+		this.nw_src_mask = match.nw_src_mask;
+		this.nw_dst = match.nw_dst;
+		this.nw_dst_mask = match.nw_dst_mask;
+	}
+
+	public long getIn_port() {
 		return in_port;
 	}
 
-	public void setIn_port(short in_port) {
+	public void setIn_port(long in_port) {
 		this.in_port = in_port;
 	}
 
@@ -132,8 +140,9 @@ public class Match {
 	}
 
 	public boolean isMatch(PacketIdentifier pktIden){
-		short pktin_port = this.in_port==0?0:pktIden.getIn_port();
+		long pktin_port = this.in_port==0?0:pktIden.getIn_port();
 		Match candidate = new Match(pktin_port, pktIden.getNw_src(),  this.nw_src_mask, pktIden.getNw_dst(), this.nw_dst_mask);
+		//System.out.println("Canddate: " + candidate + ". This: " + toString());
 		if(this.toString().equals(candidate.toString())) return true;
 		return false;
 	}

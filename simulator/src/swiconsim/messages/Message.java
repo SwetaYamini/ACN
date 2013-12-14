@@ -1,5 +1,7 @@
 package swiconsim.messages;
 
+import swiconsim.packet.Packet;
+
 
 
 /**
@@ -12,6 +14,7 @@ public class Message {
 	MessageType type;
 	Object payload;
 	long from;
+	public Packet packet;
 	
 	public long getTo() {
 		return to;
@@ -29,12 +32,13 @@ public class Message {
 		this.from = from;
 	}
 
-	public Message(Long to, MessageType type, Object payload, Long from) {
+	public Message(Long to, MessageType type, Object payload, Long from, Packet p) {
 		super();
 		this.to = to;
 		this.type = type;
 		this.payload = payload;
 		this.from = from;
+		this.packet = p;
 	}
 
 	public MessageType getType() {

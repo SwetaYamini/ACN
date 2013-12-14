@@ -1,6 +1,7 @@
 package swiconsim.api;
 
 import swiconsim.messages.Message;
+import swiconsim.packet.Packet;
 import swiconsim.flow.Flow;
 
 /**
@@ -18,7 +19,7 @@ public interface IControllerSouthBound {
 	 * @param swid
 	 * @param flow
 	 */
-	void addFlowToSwitch(long swid, Flow flow);
+	void addFlowToSwitch(long swid, Flow flow, Packet p);
 	/**
 	 * @param swid
 	 * @param flow

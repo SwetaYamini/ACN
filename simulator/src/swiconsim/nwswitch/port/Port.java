@@ -9,6 +9,7 @@ public class Port {
 	Host host = null;
 	Switch sw;
 	PortStatus status;
+	public int external=0;
 
 	public Port(int id) {
 		super();
@@ -73,8 +74,12 @@ public class Port {
 
 	@Override
 	public String toString() {
-		return "Port [id=" + id + ", host=" + host.getId() + ", sw=" + sw.getId() + ", status="
+		if(host!=null){
+			return "Port [id=" + id + ", host=" + host.getId() + ", sw=" + sw.getId() + ", status="
 				+ status + "]";
+		}
+		return "Port [id=" + id + ", host=NO_HOST, sw=" + sw.getId() + ", status="
+		+ status + "]";
 	}
 	
 }

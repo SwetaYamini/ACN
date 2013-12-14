@@ -37,12 +37,12 @@ public class SwitchTest {
 		List<Action> actions = new ArrayList<Action>();
 		actions.add(new Action(ActionType.OUT_PORT, 2));
 		Flow flow = new Flow(match, actions, (short) 10);
-		Controller cont = ManagementNetwork.getInstance().getController(101);
-		cont.addFlowToSwitch(11, flow);
+		Controller cont = (Controller) ManagementNetwork.getInstance().getController(101);
+		cont.addFlowToSwitch(11, flow, null);
 		System.out.println(sw.toString());
 		
 		// Add edge 1100002 <-> 1200001
-		DataNetwork.getInstance().addEdge(11, (short)2, 12, (short)1);
+		DataNetwork.getInstance().addEdge(11, (short)2, 12, (short)1, 100);
 		
 		// A pkt that matches the installed flow
 		Packet pkt = new Packet((short) 0, IPUtil.stringToIP("1.2.3.4"), 5, 3);

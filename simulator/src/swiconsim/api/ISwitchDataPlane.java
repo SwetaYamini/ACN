@@ -13,7 +13,7 @@ public interface ISwitchDataPlane {
 	 * @param in_port
 	 * @return
 	 */
-	boolean receivePkt(Packet pkt, short in_port);
+	boolean receivePkt(Packet pkt, long in_port);
 	/**
 	 * @param pkt
 	 * @param out_port
@@ -24,5 +24,5 @@ public interface ISwitchDataPlane {
 	 * @param pkt
 	 * @param out_port
 	 */
-	void sendPkt(Packet pkt, short out_port);
+	void sendPkt(Packet pkt, long out_port);
 }

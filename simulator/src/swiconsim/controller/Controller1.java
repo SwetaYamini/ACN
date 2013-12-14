@@ -29,7 +29,6 @@ import swiconsim.nwswitch.port.Port;
 import swiconsim.packet.Packet;
 import swiconsim.util.IPUtil;
 import swiconsim.util.PortUtil;
-import swiconsim.node.ManagementNode;
 
 /**
  * @author praveen
@@ -37,7 +36,7 @@ import swiconsim.node.ManagementNode;
  *         Controller
  * 
  */
-public class Controller extends ManagementNode implements IControlPlane, IController,
+public class Controller1 extends Controller implements IControlPlane, IController,
 		IControllerSouthBound {
 	private static Logger logger = Logger.getLogger("sim:");
 	public List<Long> nodes;
@@ -46,14 +45,14 @@ public class Controller extends ManagementNode implements IControlPlane, IContro
 	public ControllerSouthBound csb;
 	public long parent=0;
 
-	public Controller(long id, long cid) {
+	public Controller1(long id, long cid) {
 		this(id);
 		DataNetwork.getInstance().registerNode(id, this);
 		registerWithController(cid);
 		parent=cid;
 	}
 
-	public Controller(long id) {
+	public Controller1(long id) {
 		super(id);
 		this.id = id;
 		this.ports = new TreeMap<Long, Port>();
@@ -128,7 +127,6 @@ public class Controller extends ManagementNode implements IControlPlane, IContro
 		//System.out.println("BFS on " + in_port + "->" + out_port);
 		ArrayBlockingQueue<Long> queue = new ArrayBlockingQueue<Long>(nodes.size());
 		ArrayList<Long> closed = new ArrayList<Long>(); 
-		ArrayList<Long> open = new ArrayList<Long>();
 		HashMap<Long, Long> parent = new HashMap<Long, Long>();
 		ArrayList<Long> path = new ArrayList<Long>();
 		queue.add(in_port);
@@ -140,7 +138,6 @@ public class Controller extends ManagementNode implements IControlPlane, IContro
 			queue.poll();
 			
 			closed.add(reverseLookup(port));
-			open.remove(reverseLookup(port));
 			//System.out.println("BFS: switch " + port);
 			//path.add(sw);
 			
@@ -179,13 +176,12 @@ public class Controller extends ManagementNode implements IControlPlane, IContro
 				long port3 = DataNetwork.getInstance().links.get(swPort.getId()).port2;
 				long sw2 = reverseLookup(port3);
 				if(!nodes.contains(sw2)) continue;
-				if(closed.contains(sw2) || open.contains(sw2)) continue;
+				if(closed.contains(sw2)) continue;
 				parent.put(port2, port);
 				parent.put(port3, port2);
 				try {
 				//	System.out.println("Adding port " + port3);
 					queue.put(port3);
-					open.add(sw2);
 				} catch (InterruptedException e) {
 					e.printStackTrace();
 				}
@@ -263,12 +259,15 @@ public class Controller extends ManagementNode implements IControlPlane, IContro
 	}
 	
 	public long checkHost(Packet pkt){
-		//System.out.println("Host check on " + id + ". Node size: " + nodes.size());
-		for(int i=0; i<nodes.size(); i++){
-			Node node = DataNetwork.getInstance().getNodeMap().get(nodes.get(i));
-			//System.out.println("Checking on " + node.getId());
-			long check = node.checkHost(pkt);
-			if(check!=0) return check;
+		Iterator<Long> it = this.ports.keySet().iterator();
+		while(it.hasNext()){
+			Port port = this.ports.get(it.next());
+			if(port.getHost()!=null){
+				//System.out.println("Checking " + port.getHost().getIp() + " and " + IPUtil.toString(pkt.getNw_dst()));
+				if(port.getHost().getIp().equals(IPUtil.toString(pkt.getNw_dst()))){			
+					return port.getId();
+				}
+			}
 		}
 		return 0;
 	}
@@ -277,7 +276,7 @@ public class Controller extends ManagementNode implements IControlPlane, IContro
 		//System.out.print("Controller " + id + " handling packet. ");
 		long out_port = checkHost(pkt);
 		if(out_port!=0){
-			System.out.println("Out port matched. Installing rule");
+			//System.out.println("Out port macthed. Installing rule");
 			Match match = new Match(pkt.getIn_port(), pkt.getNw_src(), pkt.getNw_dst());
 			ArrayList<Action> actions = new ArrayList<Action>();
 			actions.add( new Action(ActionType.OUT_PORT, out_port));
@@ -287,9 +286,9 @@ public class Controller extends ManagementNode implements IControlPlane, IContro
 			//ports.get(pkt.getIn_port()).getSw().sendPkt(pkt, pkt.getIn_port());
 		}else{
 			if(parent==0){
-				System.out.println("Root controller doesn't see host. Dropping packet.");
+			//	System.out.println("Root controller doesn't see host. Dropping packet.");
 			}else{
-				System.out.println("Sending to parent controller");
+			//	System.out.println("Sending to parent controller");
 				sendPktInController(pkt);
 			}
 		}
@@ -378,15 +377,6 @@ public class Controller extends ManagementNode implements IControlPlane, IContro
 		return ports;
 	}
 	
-	public List<Port> getAllPorts(){
-		List<Port> ports = new ArrayList<Port>();
-		Iterator<Port> it = this.ports.values().iterator();
-		while(it.hasNext()){
-			ports.add(it.next());
-		}
-		return ports;
-	}
-	
 	public void populatePorts(){
 		for(int i=0;i < nodes.size(); i++){
 			List<Port> swPorts = ManagementNetwork.getInstance()
@@ -409,8 +399,6 @@ public class Controller extends ManagementNode implements IControlPlane, IContro
 			}
 		}
 	}
-	
-	
 	
 	public static void main(String[] args){
 		

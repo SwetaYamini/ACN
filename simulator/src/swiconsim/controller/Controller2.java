@@ -16,6 +16,7 @@ import java.util.logging.Logger;
 
 import swiconsim.link.Link;
 import swiconsim.messages.Message;
+import swiconsim.messages.MessageType;
 import swiconsim.api.IController;
 import swiconsim.api.IControllerSouthBound;
 import swiconsim.api.IControlPlane;
@@ -29,6 +30,7 @@ import swiconsim.nwswitch.port.Port;
 import swiconsim.packet.Packet;
 import swiconsim.util.IPUtil;
 import swiconsim.util.PortUtil;
+import swiconsim.util.SwitchFlowPair;
 import swiconsim.node.ManagementNode;
 
 /**
@@ -37,28 +39,20 @@ import swiconsim.node.ManagementNode;
  *         Controller
  * 
  */
-public class Controller extends ManagementNode implements IControlPlane, IController,
-		IControllerSouthBound {
+public class Controller2 extends ManagementNode implements IControlPlane, IController,
+IControllerSouthBound {
 	private static Logger logger = Logger.getLogger("sim:");
 	public List<Long> nodes;
-	public List<Long> ExternalPorts;
 	public HashMap<PortPair, ArrayList<Long>> paths = new HashMap<PortPair, ArrayList<Long>>();
 	public ControllerSouthBound csb;
-	public long parent=0;
 
-	public Controller(long id, long cid) {
-		this(id);
-		DataNetwork.getInstance().registerNode(id, this);
-		registerWithController(cid);
-		parent=cid;
-	}
 
-	public Controller(long id) {
+	public Controller2(long id) {
 		super(id);
+		//DataNetwork.getInstance().registerNode(id, this);
 		this.id = id;
 		this.ports = new TreeMap<Long, Port>();
 		nodes = new ArrayList<Long>();
-		ExternalPorts = new ArrayList<Long>();
 		csb = new ControllerSouthBound(id, nodes, this);
 		registerWithMgmtNetAsController();
 	}
@@ -76,27 +70,21 @@ public class Controller extends ManagementNode implements IControlPlane, IContro
 			System.out.println("WARNING: No in_port specified for flow " + flow.toString() + " at switch " +id);
 			return;
 		}
-		if(!ExternalPorts.contains(in_port)){
-			System.out.println("WARNING: " + in_port + " does not belong to controllers' " + id + " external ports");
-			return;
-		}
 		List<Action> actions = flow.getActions();
 		for(int i=0; i< actions.size(); i++){
 			if(actions.get(i).getType()==ActionType.DROP){
 				addFlowToSwitch(reverseLookup(in_port), flow, packet);
 			}else{
 				long out_port = actions.get(i).getValue();
-				if(!ExternalPorts.contains(out_port)){
-					System.out.println("WARNING: " + out_port + " does not belong to controllers' " + id + " external ports");
-					return;
-				}
 				ArrayList<Long> path = BFS(in_port, out_port);
 				//System.out.println(path);
 				if(path.size()==0){
 					System.out.println("No path exist for flow " + flow.toString());
+					return;
 				}
 				if(path.size()%2!=0){
 					System.out.println("WARNING: Wrong path calculated for flow " + flow.toString());
+					return;
 				}
 				for(int j=0;j<path.size();j=j+2){
 					long sw = reverseLookup(path.get(j));
@@ -109,43 +97,88 @@ public class Controller extends ManagementNode implements IControlPlane, IContro
 					subActions.add(new Action(ActionType.OUT_PORT, path.get(j+1)));					
 					Flow subFlow = new Flow(subMatch, subActions, flow.getPriority());
 					//System.out.println("Setting up flow " + subFlow + " on switch " + sw);
-					addFlowToSwitch(sw, subFlow, packet);
-			
-					
+					if(nodes.contains(sw)){
+						addFlowToSwitch(sw, subFlow, packet);
+					}else{
+						//TODO: send packet to controller owning sw
+						long cid = getController(sw);
+						Message msg = new Message(cid, MessageType.PEER_ADD, new SwitchFlowPair(sw, subFlow), id, packet);
+						sendNotificationToPeer(msg);
+					}
+
+
 				}
 			}
 		}
-		
+
 		/*for (Long swid : nodes) {
 			addFlowToSwitch(swid, flow);
 		}*/
 	}
 	
+	public void updateUtilization(Packet pkt) {
+		Iterator<Long> it = ManagementNetwork.getInstance().getMgmtContMap().keySet().iterator();
+		while(it.hasNext()){
+			long cid = it.next();
+			if(cid==id) continue;
+			Message msg = new Message(cid, MessageType.PEER_UPDATE, null, id, pkt);
+			sendNotificationToPeer(msg);
+		}
+	}
+
+	public void sendNotificationToPeer(Message msg){
+		ManagementNetwork.getInstance().sendNotificationToPeer(msg);
+	}
+
+	public void receiveNotificationFromPeer(Message msg){
+		switch (msg.getType()) {
+		case PEER_ADD:
+			SwitchFlowPair swFlow = (SwitchFlowPair) msg.getPayload();
+			long switchId = swFlow.sw;
+			Flow flow = swFlow.flow;
+			logger.info(this.id + "PEER_ADD from " + msg.getFrom());
+			addFlowToSwitch(switchId, flow, msg.packet);										
+			break;
+		case PEER_UPDATE:
+			//This message can be safely ignore because the update had been currently updated in DataNetwork which is what this is going to use.
+			break;
+		default:
+			break;
+		}
+	}
+
+	public long getController(long sw){
+		if(!DataNetwork.getInstance().getNodeMap().containsKey(sw)){
+			return 0;
+		}
+		return DataNetwork.getInstance().getNodeMap().get(sw).parent;		
+	}
+
 	ArrayList<Long> BFS(long in_port, long out_port){
 		long start = reverseLookup(in_port);
 		long end = reverseLookup(out_port);
 		if(start==0 || end==0) return new ArrayList<Long>();
 		//System.out.println("BFS on " + in_port + "->" + out_port);
-		ArrayBlockingQueue<Long> queue = new ArrayBlockingQueue<Long>(nodes.size());
+		ArrayBlockingQueue<Long> queue = new ArrayBlockingQueue<Long>(DataNetwork.getInstance().getNodeMap().size());
 		ArrayList<Long> closed = new ArrayList<Long>(); 
 		ArrayList<Long> open = new ArrayList<Long>();
-		HashMap<Long, Long> parent = new HashMap<Long, Long>();
+		HashMap<Long,Long> parent = new HashMap<Long, Long>();
 		ArrayList<Long> path = new ArrayList<Long>();
 		queue.add(in_port);
 		boolean found=false;
 		double globalBest=100000;
-		
+
 		while(!queue.isEmpty()){
 			Long port = queue.peek();
 			queue.poll();
-			
+
 			closed.add(reverseLookup(port));
 			open.remove(reverseLookup(port));
 			//System.out.println("BFS: switch " + port);
 			//path.add(sw);
-			
-			
-			List<Port> swPorts = ManagementNetwork.getInstance().getNode(reverseLookup(port)).getPorts();
+
+
+			List<Port> swPorts = DataNetwork.getInstance().getNodeMap().get(reverseLookup(port)).getPorts();
 			for (Port swPort : swPorts) {
 				long port2 = swPort.getId();
 				//System.out.println("Analyzing port " + port2);
@@ -178,12 +211,13 @@ public class Controller extends ManagementNode implements IControlPlane, IContro
 				if(!DataNetwork.getInstance().links.containsKey(port2)) continue; 
 				long port3 = DataNetwork.getInstance().links.get(swPort.getId()).port2;
 				long sw2 = reverseLookup(port3);
-				if(!nodes.contains(sw2)) continue;
+				//if(!nodes.contains(sw2)) continue;
 				if(closed.contains(sw2) || open.contains(sw2)) continue;
+				
 				parent.put(port2, port);
 				parent.put(port3, port2);
 				try {
-				//	System.out.println("Adding port " + port3);
+					//	System.out.println("Adding port " + port3);
 					queue.put(port3);
 					open.add(sw2);
 				} catch (InterruptedException e) {
@@ -191,12 +225,12 @@ public class Controller extends ManagementNode implements IControlPlane, IContro
 				}
 			}
 			//System.out.println("State: "+port+" "+queue+" "+closed);
-			
+
 		}
 		//System.out.println("Parent key set: " + parent.keySet());
 		Long curr = out_port;
 		if(!found) return path;
-		
+
 		/*while(curr != in_port && found){
 			path.add(0, curr);
 			Long next = parent.get(curr);
@@ -205,15 +239,17 @@ public class Controller extends ManagementNode implements IControlPlane, IContro
 		path.add(0,curr);*/
 		//System.out.println("Global best is: " + globalBest);
 		return path;
-		
+
 	}
-	
+
 	public long reverseLookup(long port){
 		long sw=0;
 		int found=0;
-		for(int i=0; i<nodes.size(); i++){
-			List<Port> swPorts = ManagementNetwork.getInstance().getNode(nodes.get(i)).getPorts();
-		
+		Iterator<Long> it = DataNetwork.getInstance().getNodeMap().keySet().iterator();
+		while(it.hasNext()){
+			sw = it.next();
+			List<Port> swPorts = DataNetwork.getInstance().getNodeMap().get(sw).getPorts();
+
 			for(int j=0; j<swPorts.size(); j++){
 				if(swPorts.get(j).getId()==port){
 					found=1;
@@ -221,14 +257,13 @@ public class Controller extends ManagementNode implements IControlPlane, IContro
 				}
 			}
 			if(found==1){
-				sw=nodes.get(i);
 				break;
 			}
 		}
 		return sw;		
 	}
-	
-	
+
+
 
 	@Override
 	public void removeFlow(Flow flow) {
@@ -261,15 +296,23 @@ public class Controller extends ManagementNode implements IControlPlane, IContro
 	public void receiveNotificationFromSwitch(Message msg) {
 		this.csb.receiveNotificationFromSwitch(msg);
 	}
-	
+
 	public long checkHost(Packet pkt){
-		//System.out.println("Host check on " + id + ". Node size: " + nodes.size());
-		for(int i=0; i<nodes.size(); i++){
-			Node node = DataNetwork.getInstance().getNodeMap().get(nodes.get(i));
-			//System.out.println("Checking on " + node.getId());
-			long check = node.checkHost(pkt);
-			if(check!=0) return check;
+
+		Iterator<Long> it = DataNetwork.getInstance().getNodeMap().keySet().iterator();
+		while(it.hasNext()){
+			long sw = it.next();
+			List<Port> swPorts = DataNetwork.getInstance().getNodeMap().get(sw).getPorts();		
+			for(int j=0; j<swPorts.size(); j++){
+				if(swPorts.get(j).getHost()!=null){
+					//System.out.println("Checking " + port.getHost().getIp() + " and " + IPUtil.toString(pkt.getNw_dst()));
+					if(swPorts.get(j).getHost().getIp().equals(IPUtil.toString(pkt.getNw_dst()))){			
+						return swPorts.get(j).getId();
+					}
+				}
+			}
 		}
+
 		return 0;
 	}
 
@@ -277,7 +320,7 @@ public class Controller extends ManagementNode implements IControlPlane, IContro
 		//System.out.print("Controller " + id + " handling packet. ");
 		long out_port = checkHost(pkt);
 		if(out_port!=0){
-			System.out.println("Out port matched. Installing rule");
+			//System.out.println("Out port macthed. Installing rule");
 			Match match = new Match(pkt.getIn_port(), pkt.getNw_src(), pkt.getNw_dst());
 			ArrayList<Action> actions = new ArrayList<Action>();
 			actions.add( new Action(ActionType.OUT_PORT, out_port));
@@ -285,13 +328,8 @@ public class Controller extends ManagementNode implements IControlPlane, IContro
 			addFlow(flow, pkt);
 			//System.out.println();
 			//ports.get(pkt.getIn_port()).getSw().sendPkt(pkt, pkt.getIn_port());
-		}else{
-			if(parent==0){
-				System.out.println("Root controller doesn't see host. Dropping packet.");
-			}else{
-				System.out.println("Sending to parent controller");
-				sendPktInController(pkt);
-			}
+		}else{			
+			//	System.out.println("Root controller doesn't see host. Dropping packet.");
 		}
 	}
 	/*
@@ -371,52 +409,177 @@ public class Controller extends ManagementNode implements IControlPlane, IContro
 	@Override
 	public List<Port> getPorts() {
 		List<Port> ports = new ArrayList<Port>();
-		//Iterator<Port> it = this.ExternalPorts.values().iterator();
-		for(int i=0; i<this.ExternalPorts.size();i++){
-			ports.add(this.ports.get(ExternalPorts.get(i)));
-		}
 		return ports;
 	}
-	
-	public List<Port> getAllPorts(){
-		List<Port> ports = new ArrayList<Port>();
-		Iterator<Port> it = this.ports.values().iterator();
-		while(it.hasNext()){
-			ports.add(it.next());
-		}
-		return ports;
-	}
-	
-	public void populatePorts(){
-		for(int i=0;i < nodes.size(); i++){
-			List<Port> swPorts = ManagementNetwork.getInstance()
-					.getNode(nodes.get(i)).getPorts();
-			for (Port swPort : swPorts) {								
-				this.addPort(swPort.getId(), swPort);				
-			}
-		}
-	}
-	
-	public void populateExternalPorts(){
-		Iterator<Long> it = this.ports.keySet().iterator();
-		while(it.hasNext()){
-			long portid = it.next();
-			long otherPortId = DataNetwork.getInstance().getOtherPort(portid);
-			if(this.ports.containsKey(otherPortId)){
-				if(this.ExternalPorts.contains(otherPortId)) this.ExternalPorts.remove(otherPortId);
-			}else{
-				this.ExternalPorts.add(portid);
-			}
-		}
-	}
-	
-	
-	
+
 	public static void main(String[] args){
+		//samplerun1();
+		samplerun3();
+	}
+	
+	static void samplerun1(){
+		int nports=4;
+		Controller2 c1 = new Controller2(1001);
+		Controller2 c2 = new Controller2(1002);
+
+
+		Switch sw1 = new Switch(1,nports,1001);
+		Switch sw2 = new Switch(2,nports,1002);
+
+		DataNetwork.getInstance().addEdge(100001, 200001, 100);
+
+		Host h1 = new Host(10001, "1.1.1.1");
+		Host h2 = new Host(10002, "1.1.1.2");
+
+		sw1.addHost(h1, 100002);
+		sw2.addHost(h2, 200002);
+
+		Packet pkt12 = new Packet((long) 0, IPUtil.stringToIP("1.1.1.1"),
+				IPUtil.stringToIP("1.1.1.2"), 10, 1);
+		h1.sendPkt(pkt12);
+		h1.startFlow(pkt12);
+		DataNetwork.getInstance().printUtilizations();
+		//pkt12 = new Packet((long) 0, IPUtil.stringToIP("1.1.1.1"),
+		//IPUtil.stringToIP("1.1.1.2"), 10, 1);
+		pkt12.last=1;
+		h1.endFlow(pkt12);
+		DataNetwork.getInstance().printUtilizations();
+
+		Iterator<Packet> it = DataNetwork.getInstance().HopCount.keySet().iterator();
+		while(it.hasNext()){
+			Packet pkt = it.next();
+			System.out.println(pkt.id + ": " + pkt.nhops);
+		}
+
+		System.out.println("ControllerToSwitchCount: " + ManagementNetwork.getInstance().ControllerToSwitchCount);
+		System.out.println("SwitchToControllerCount: " + ManagementNetwork.getInstance().SwitchToControllerCount);
+		System.out.println("ControllerToControllerCount: " + ManagementNetwork.getInstance().ControllerToControllerCount);
+		//System.out.println("MessageCount size: " + ManagementNetwork.getInstance().MessageCount.size());
+
+		Iterator<Packet> it2 = ManagementNetwork.getInstance().MessageCount.keySet().iterator();
+		while(it2.hasNext()){
+			Packet pkt = it2.next();
+			System.out.println(pkt.id + ": " + ManagementNetwork.getInstance().MessageCount.get(pkt));
+		}		
+
+	}
+	
+	static void samplerun3(){
+		int nports=10;
 		
+		Controller2 c1 = new Controller2(1001);
+		Switch sw11 = new Switch(11, nports, c1.getId());
+		Switch sw12 = new Switch(12, nports, c1.getId());
+		Switch sw13 = new Switch(13, nports, c1.getId());
+		Switch sw14 = new Switch(14, nports, c1.getId());
+		DataNetwork.getInstance().addEdge(1100001, 1200001, 100);
+		DataNetwork.getInstance().addEdge(1200002, 1300001, 100);
+		DataNetwork.getInstance().addEdge(1300002, 1400001, 100);
+		DataNetwork.getInstance().addEdge(1400002, 1100002, 100);
+		
+		Controller2 c2 = new Controller2(1002);
+		Switch sw21 = new Switch(21, nports, c2.getId());
+		Switch sw22 = new Switch(22, nports, c2.getId());
+		Switch sw23 = new Switch(23, nports, c2.getId());
+		Switch sw24 = new Switch(24, nports, c2.getId());
+		DataNetwork.getInstance().addEdge(2100001, 2200001, 100);
+		DataNetwork.getInstance().addEdge(2200002, 2300001, 100);
+		DataNetwork.getInstance().addEdge(2300002, 2400001, 100);
+		DataNetwork.getInstance().addEdge(2400002, 2100002, 100);
+		
+		Controller2 c3 = new Controller2(1003);
+		Switch sw31 = new Switch(31, nports, c3.getId());
+		Switch sw32 = new Switch(32, nports, c3.getId());
+		Switch sw33 = new Switch(33, nports, c3.getId());
+		Switch sw34 = new Switch(34, nports, c3.getId());
+		DataNetwork.getInstance().addEdge(3100001, 3200001, 100);
+		DataNetwork.getInstance().addEdge(3200002, 3300001, 100);
+		DataNetwork.getInstance().addEdge(3300002, 3400001, 100);
+		DataNetwork.getInstance().addEdge(3400002, 3100002, 100);
+
+		DataNetwork.getInstance().addEdge(1100003, 2100003, 100);
+		DataNetwork.getInstance().addEdge(2100004, 3100003, 100);
+		DataNetwork.getInstance().addEdge(3100004, 1100004, 100);
+		
+			
+		
+		
+		//System.out.println("Controller ports: " + c3.ports.keySet());
+		//System.out.println("Controller external ports: " + c3.ExternalPorts);
+		
+	
+		//System.out.println(c.BFS(100002,300004));
+		Match match = new Match(100002, IPUtil.stringToIP("1.1.1.1"), IPUtil.stringToIP("1.1.1.2"));
+		List<Action> actions = new ArrayList<Action>();
+		actions.add(new Action(ActionType.OUT_PORT, 600004));
+		Flow flow = new Flow(match, actions, (short) 10);
+		/*System.out.println(sw1.toString());
+		System.out.println(sw2.toString());
+		System.out.println(sw3.toString());*/
+		//c3.addFlow(flow);
+		/*System.out.println(sw1.toString());
+		System.out.println(sw2.toString());
+		System.out.println(sw3.toString());
+		System.out.println(sw4.toString());
+		System.out.println(sw5.toString());
+		System.out.println(sw6.toString());*/
 		
 
+		Host h1 = new Host(10001, "1.1.1.1");
+		Host h2 = new Host(10002, "1.1.1.2");
+		Host h3 = new Host(10003, "1.1.1.3");
+
+		sw13.addHost(h1, 1300003);
+		sw23.addHost(h2, 2300003);
+		sw33.addHost(h3, 3300003);
 		
+		//System.out.println(c3.parent);
+		
+		Packet pkt12 = new Packet((long) 0, IPUtil.stringToIP("1.1.1.1"),
+				IPUtil.stringToIP("1.1.1.2"), 10, 1);
+		h1.sendPkt(pkt12);
+		h1.startFlow(pkt12);
+		//DataNetwork.getInstance().printUtilizations();
+		//pkt12 = new Packet((long) 0, IPUtil.stringToIP("1.1.1.1"),
+		//		IPUtil.stringToIP("1.1.1.2"), 10, 1);
+		pkt12.last=1;
+		h1.endFlow(pkt12);
+		//DataNetwork.getInstance().printUtilizations();
+		
+		Packet pkt13 = new Packet((long) 0, IPUtil.stringToIP("1.1.1.1"),
+				IPUtil.stringToIP("1.1.1.3"), 10, 2);
+		h1.sendPkt(pkt13);
+		h1.startFlow(pkt13);
+		//pkt13 = new Packet((long) 0, IPUtil.stringToIP("1.1.1.1"),		IPUtil.stringToIP("1.1.1.3"), 10, 2);
+		pkt13.last=1;
+		h1.endFlow(pkt13);
+		
+		Packet pkt23 = new Packet((long) 0, IPUtil.stringToIP("1.1.1.2"),
+				IPUtil.stringToIP("1.1.1.3"), 10, 3);
+		h2.sendPkt(pkt23);
+		h2.startFlow(pkt23);
+		//pkt23 = new Packet((long) 0, IPUtil.stringToIP("1.1.1.2"),	IPUtil.stringToIP("1.1.1.3"), 10, 3);
+		pkt23.last=1;
+		h2.endFlow(pkt23);
+		
+		
+		
+		Iterator<Packet> it = DataNetwork.getInstance().HopCount.keySet().iterator();
+		while(it.hasNext()){
+			Packet pkt = it.next();
+			System.out.println(pkt.id + ": " + pkt.nhops);
+		}
+		
+		System.out.println("ControllerToSwitchCount: " + ManagementNetwork.getInstance().ControllerToSwitchCount);
+		System.out.println("SwitchToControllerCount: " + ManagementNetwork.getInstance().SwitchToControllerCount);
+		System.out.println("ControllerToControllerCount: " + ManagementNetwork.getInstance().ControllerToControllerCount);
+		//System.out.println("MessageCount size: " + ManagementNetwork.getInstance().MessageCount.size());
+
+		Iterator<Packet> it2 = ManagementNetwork.getInstance().MessageCount.keySet().iterator();
+		while(it2.hasNext()){
+			Packet pkt = it2.next();
+			System.out.println(pkt.id + ": " + ManagementNetwork.getInstance().MessageCount.get(pkt));
+		}
 	}
 
 }

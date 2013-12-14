@@ -8,11 +8,11 @@ import swiconsim.util.IPUtil;
  *         the fields in a pkt that have to be matched
  */
 public class PacketIdentifier {
-	short in_port;
+	long in_port;
 	int nw_src;
 	int nw_dst;
 
-	public PacketIdentifier(short in_port, int nw_src, int nw_dst) {
+	public PacketIdentifier(long in_port, int nw_src, int nw_dst) {
 		super();
 		this.in_port = in_port;
 		this.nw_src = nw_src;
@@ -25,12 +25,12 @@ public class PacketIdentifier {
 		this.nw_dst = pkt.nw_dst;
 	}
 
-	public short getIn_port() {
+	public long getIn_port() {
 		return in_port;
 	}
 
-	public void setIn_port(short in_port) {
-		this.in_port = in_port;
+	public void setIn_port(long in_port2) {
+		this.in_port = in_port2;
 	}
 
 	public int getNw_src() {

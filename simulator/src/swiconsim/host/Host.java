@@ -2,6 +2,8 @@ package swiconsim.host;
 
 import java.util.logging.Logger;
 
+import swiconsim.network.DataNetwork;
+import swiconsim.network.ManagementNetwork;
 import swiconsim.nwswitch.port.Port;
 import swiconsim.packet.Packet;
 import swiconsim.util.PortUtil;
@@ -53,13 +55,22 @@ public class Host {
 
 	public void receivePkt(Packet pkt) {
 		logger.info("host pkt rcvd: " + pkt.toString());
+		if(pkt.last==0){
+			DataNetwork.getInstance().HopCount.put(pkt, pkt.nhops);
+			DataNetwork.getInstance().UtilizationTracker.put(pkt, pkt.maxutil);
+		}else{
+			//System.out.println("Got last packet. Not updating hop count");
+		}
+		if(!ManagementNetwork.getInstance().MessageCount.containsKey(pkt)){
+			ManagementNetwork.getInstance().MessageCount.put(pkt, 0);
+		}					
 		rx++;
 	}
 
 	public void sendPkt(Packet pkt) {
 		logger.info("host pkt sent: " + pkt.toString());
 		this.port.getSw().receivePkt(pkt,
-				PortUtil.getPortNumFromPortId(this.port.getId()));
+				this.port.getId());
 		tx++;
 	}
 
@@ -67,5 +78,23 @@ public class Host {
 	public String toString() {
 		return "Host [ip=" + ip + ", id=" + id + ", rx=" + rx + ", tx=" + tx
 				+ ", port=" + port.getId() + "]";
+	}
+
+	public void startFlow(Packet pkt) {
+		// TODO Auto-generated method stub
+		logger.info("host starting flow: " + pkt.toString());
+		this.port.getSw().receivePkt(pkt,
+				this.port.getId());
+		tx++;
+		
+	}
+
+	public void endFlow(Packet pkt) {
+		// TODO Auto-generated method stub
+		logger.info("host terminating flow: " + pkt.toString());
+		this.port.getSw().receivePkt(pkt,
+				this.port.getId());
+		tx++;
+
 	}
 }

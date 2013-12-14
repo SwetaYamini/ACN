@@ -6,6 +6,7 @@ import java.util.Map;
 import java.util.Set;
 
 import swiconsim.host.Host;
+import swiconsim.link.Link;
 import swiconsim.node.Node;
 import swiconsim.nwswitch.Switch;
 import swiconsim.nwswitch.port.Port;
@@ -17,10 +18,10 @@ import swiconsim.nwswitch.port.Port;
  */
 public class Topology {
 	HashMap<Node, List<Port>> nodePorts;
-	Map<Long, Long> edges;
+	Map<Long, Link> edges;
 	Set<Host> hosts;
 
-	public Topology(HashMap<Node, List<Port>> nodePorts, Map<Long, Long> edges, Set<Host> hosts) {
+	public Topology(HashMap<Node, List<Port>> nodePorts, Map<Long, Link> edges, Set<Host> hosts) {
 		super();
 		this.nodePorts = nodePorts;
 		this.edges = edges;

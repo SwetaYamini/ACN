@@ -22,11 +22,11 @@ import swiconsim.packet.PacketIdentifier;
  */
 public class SwitchDataPlane implements ISwitchDataPlane {
 	long id;
-	private TreeMap<Short, Port> ports;
+	private TreeMap<Long, Port> ports;
 	private FlowTable flowTable;
 	private static Logger logger = Logger.getLogger("sim:");
 
-	public SwitchDataPlane(long id, TreeMap<Short, Port> ports,
+	public SwitchDataPlane(long id, TreeMap<Long, Port> ports,
 			FlowTable flowTable) {
 		super();
 		this.id = id;
@@ -49,11 +49,13 @@ public class SwitchDataPlane implements ISwitchDataPlane {
 	 * short)
 	 */
 	@Override
-	public boolean receivePkt(Packet pkt, short in_port) {
+	public boolean receivePkt(Packet pkt, long in_port) {
 		logger.info("pkt rcvd: " + pkt.toString() + " on " + in_port);
 		pkt.setIn_port(in_port);
 		PacketIdentifier pktIden = new PacketIdentifier(pkt);
+		//System.out.println("Packet Indentifier are: " + pktIden);
 		List<Action> actions = flowTable.lookup(pktIden, pkt.getSize());
+		//System.out.println("Actions are: " + actions);
 		if (actions.isEmpty()) {
 			return false;
 		} else {
@@ -69,8 +71,12 @@ public class SwitchDataPlane implements ISwitchDataPlane {
 	 * short)
 	 */
 	@Override
-	public void sendPkt(Packet pkt, short out_port) {
+	public void sendPkt(Packet pkt, long out_port) {
 		Port port = this.ports.get(out_port);
+		if(port==null){
+			System.out.println("WARNING: port " + out_port + " not found on switch " + id + ". ports: " + ports.keySet());
+			return;
+		}
 		Host host = port.getHost();
 		if (host != null) {
 			host.receivePkt(pkt);
@@ -82,7 +88,7 @@ public class SwitchDataPlane implements ISwitchDataPlane {
 	public void applyActions(Packet pkt, List<Action> actions) {
 		for (Action action : actions) {
 			if (action.getType() == ActionType.OUT_PORT) {
-				short out_port = (short) action.getValue();
+				long out_port = (long) action.getValue();
 				sendPkt(pkt, out_port);
 			}
 		}

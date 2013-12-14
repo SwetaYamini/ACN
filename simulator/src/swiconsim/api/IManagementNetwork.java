@@ -1,6 +1,8 @@
 package swiconsim.api;
 
 import swiconsim.messages.Message;
+import swiconsim.node.ManagementNode;
+
 import swiconsim.controller.Controller;
 import swiconsim.node.Node;
 
@@ -24,7 +26,7 @@ public interface IManagementNetwork {
 	 * @param id
 	 * @param cont
 	 */
-	void registerController(long id, Controller cont);
+	void registerController(long id, ManagementNode cont);
 
 	/**
 	 * notify controller
