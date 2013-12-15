@@ -97,6 +97,11 @@ We propose a new control plane architecture in which controllers are arranged in
 
 The abstraction described above represents a controller at any level of the hierarchy. The only difference between a root controller and an internal controller is the absence of incoming OpenFLow messages in the former, while the latter receives them from its parent. This simplifies the control application which can be agnostic to the hierarchical level it belongs to, as long as it can support incoming OpenFlow messages. [TODO-tree figure].
 
+\begin{figure}
+\includegraphics[scale=0.5]{hierarchy}
+\caption{Hierarchical arrangement of controllers}
+\label{fig:hierarchy}
+\end{figure}
 
 \subsection{An example}
 \label{example}
