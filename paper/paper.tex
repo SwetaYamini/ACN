@@ -49,10 +49,51 @@ The remainder of this article is organized as follows. Section~\ref{sec:hierarch
 
 \section{Hierarchical Controller Architecture}
 \label{sec:hierarchical}
-We propose a new control plane architecture in which controllers are arranged in the form of a tree over the physical network. Switches form the leaf nodes in the tree, while controllers form the internal nodes [TODO:tree-figure]. An internal node acts as a switch for its parent and as a controller for its children. A node aggregates its underlying network and converts it to a switch abstraction which is then exposed to the parent controller. This switch abstraction is explained in detail in section~\ref{subsec:aggr}. A controller's view does not span the whole network but only the network of its children. A node translates instructions (forwarding rules) from its parent controller to the forwarding rules for its underlying network. Similarly, network updates from the underlying network are translated into network updates arising from one switch abstraction of the given controller and are passed on to parent controller. The translation process is explained in the following section.
+We propose a new control plane architecture in which controllers are arranged in the form of a tree over the physical network. Switches form the leaf nodes in the tree, while controllers form the internal nodes. An internal node acts as a switch for its parent and as a controller for its children. A node aggregates its underlying network and converts it to a switch abstraction which is then exposed to the parent controller. This switch abstraction is explained in detail in section~\ref{subsec:aggr}. A controller's view does not span the whole network but only the network of its children. A node translates instructions (forwarding rules) from its parent controller to the forwarding rules for its underlying network. Similarly, network updates from the underlying network are translated into network updates arising from one switch abstraction of the given controller and are passed on to parent controller. The translation process is explained in the following section.
 
 \subsection{One switch abstraction}
 \label{subsec:aggr}
+One switch abstraction has two parts, (i) compressing the underlying network state to represent a single switch, and (ii) translating instructions from the abstract switch to the underlying network. We present these separately below.
+\subsubsection{Compression}
+The primary switch abstraction comes by compressing the network into one node. Given an underlying network for a controller, the abstract switch exposed by it contains all the ports which are connected to switches outside the network. These ports form the \emph{ingress} and \emph{egress} ports for the controller. The switch abstraction maintains a list of abstract ports, which can be mapped to the ports of the underlying network. This basic abstraction is suficient for a simple control application, but we require more features for a rich and complete experience. A few such abstractions are presented below.
+\begin{enumerate}
+    \item \emph{Host compression}:
+    If the number of hosts is too large, and we consider each host as an external entity, individual hosts must be remembered by the root controller, which is extremely inefficient. Host compression can be performed in two ways, depending on the host IP distribution and the network being considered.
+    \begin{itemize}
+        \item \emph{IP compression} -
+        Similar to the forwarding rules in the actual internet, if the IP addresses of the hosts are properly prefixed, a controller can compress host IPs and only provide prefixes to its parent controller. This works well only if the assignment of switches to controllers is uniform and in accordance with prefixes.
+        \item \emph{Abstract host list} -
+        A controller can expose an abstract host or list of hosts to its parent controller. The parent controller places rules for the abstract hosts in the peer controllers. This approach would be similar to LAN, and requires address translation while entering or leaving the underlying network. This is more flexible, but complicated, and can be used only when IP prefix compression fails.
+    \end{itemize}
+    \item \emph{Abstract flow table}:
+        The basic flow table in a controller is comprises of the rules placed by the parent controller. However, for a full OpenFlow functionality, we need to support counters and queries, as in OpenFlow switches. These responses, again, must be an aggregation of the network. To this end, we must be able to efficiently represent the flows from the underlying network and obtain statistics which can be exposed to the parent. We propose a data structure to maintain, aggregate and update view of the flows in section~\ref{subsubsec:aggr-data}.
+\end{enumerate}
+
+\subsubsection{Translation}
+The major task of an intermediate controller is to translate messages from its parent controller to rules that can be implemented on the underlying network. To this end, we extend the API for the control application to take in these rules as an additional input (Note: there is no standard northbound API between a controller and a control application as of today and each controller exposes its own unique API). The controller uses the underlying network state and its abstract flow table to decide the rules for its children. It forwards the packet to its parent if and only if it is unable to handle the packet with its given knowledge. Typically, for a new flow,
+\begin{enumerate}
+    \item If the destination is within the underlying network, or if the abstract flow table has rules to handle the destination, the controller places rules on the underlying network to create a flow from the origin (local host or an \emph{ingress} port) of the flow to the destination (local host or an \emph{egress} port) based on its policies.
+    \item If the destination is unknown, it forwards the packet to its parent, but also holds onto a copy. Once the parent takes a decision and passes it as an OpenFlow rule, the controller translates it to the underlying network.
+\end{enumerate}
+
+[one-big-switch] and [pallete] propose algorithms to combine and translate end-to-end policies and routing policies to optimally place rules in switches. These algorithms can be used by control applications to optimally place rules, combining the abstract flow table and its local routing policies.
+
+\subsubsection{Data structures}
+\label{subsubsec:aggr-data}
+We represent the underlying network as a graph $G$ with dummy external nodes connected to each of the exposed ports. For each external node $e$, we create and maintain a directed flow graph $F_e$ rooted at $e$ as an overlay graph on $G$. $e$ here represents the \emph{ingress} port. End hosts and other external nodes act as sinks for these flows. The external nodes represent the \emph{egress} ports.
+For each pair of external nodes $e_{in}$ and $e_{out}$, we can create an aggregated flow table entry based on the flow graph $F_{e_{in}}$ for $e_{in}$. We propose this method to account for possible modifications in the packet headers along the paths (multiple paths are common based on routing policies) from the \emph{ingress} port to the \emph{egress} port which could prevent us from identifying same flows by just observing flows at the \emph{ingress} and \emph{egress} ports.
+Other data structures which would aid to simplify updates and aggregation are
+\begin{enumerate}
+    \item \emph{Path Information} - A list of $n$ best paths for some definition of best. We consider paths with least hops, but this can be varied depending on the routing policies. This can be used to choose the best path to route from between an \emph{ingress} and \emph{egress} port based on routing policies.
+    \item \emph{Link Information} - A list of pointers to the paths this link belongs to, and a list of flows that pass through this link. This can be used to obtain link utilizations to select routes with minimum maximum link utilization.
+\end{enumerate}
+One main difference between an abstract switch and an actual switch is the inequality of costs between two exposed ports. If parameters like hop counts are being considered, the internal routing costs must also be considered. This can be achieved by adding extra \emph{attributes} to pairs of external ports which can signify the internal costs which could be considered by the parent controller. This extra feature helps reduce the sub-optimality of this solution. However, it comes at the expense of needing to update costs of each pair of nodes on network changes.
+
+\subsubsection{Modifications}
+One major concern of routing is network modifications, mainly link failures. If the network is well connected, then an internal link failure can be handled by the local controller without affecting the parent controller. A parent controller only needs to concern if an exposed link is broken or if an underlying network is significantly broken, for example, if it was partitioned or the paths become extremely crowded. With the assumption that an underlying network capacity is greater than its exposed links, i.e. the internal network can handle full utilization of the exposed links, these concerns will be limited.
+
+\subsection{Hierarchical arrangement}
+The abstraction described above represents a controller at any level of the hierarchy. The only difference between a root controller and an internal controller is the absence of incoming OpenFLow messages in the former, while the latter receives them from its parent. This simplifies the control application which can be agnostic to the hierarchical level it belongs to, as long as it can support incoming OpenFlow messages. [TODO-tree figure].
 
 \subsection{An example}
 \label{example}
@@ -115,6 +156,20 @@ We worked hard, and achieved very little.
 
 \section{Discussion}
 \label{sec:discuss}
+Hierarchical architecture provides several benefits.
+\begin{enumerate}
+    \item Compared to a flat distributed controller architecture, this architecture will have faster flow setup times, in general. In a flat architecture, flow setup requires one round trip between switch and controller for each of the controller domains (say $n$) the packet travels through. However, in a hierarchical architecture, the packet is forwarded up to a level where the entire path is under one controller and then the rules are installed in all the controllers. On average, this is $O(log\;n)$ levels up and thus takes significantly less time to setup. Worst case, however, could be when the the two nodes are close to each other physically but belong to different controllers up till the root.
+    \item Link modifications are in general handled locally by the immediate controller and other controllers are not affected by it. So, there are in general no messages or state inconsistencies, as these networks do not have a global state to create inconsistencies!
+    \item As long as a control application follows the protocol, the internal routing mechanisms do not create any inconsistencies. In flat architecture where each controller takes a global decision but acts on a local scope, each controller must behave and take decisions exactly the same way. Thus, with our architecture, different controllers can run different control applications, without affecting the network. This has several benefits in itself.
+        \begin{enumerate}
+            \item A control application can be updated independent of the remaining network and not cause global disruptions. There might, however, be flow setup delays which are to be expected.
+            \item Different routing stategies and network policies can be implemented in different segments of the network. For example, one controller could route using MPLS, while another uses destination addresses.
+            \item Networks with different managements can be brought together using this architecture. Each network can follow its own network policies and selectively expose its \emph{ingress} and \emph{egress} ports to the parent controller.
+        \end{enumerate}
+    \item The view is simplified and thus decisions can be taken quickly, only for a small number of nodes at each level.
+\end{enumerate}
+
+This architecture, however, in not a panacea for scalable distributed controller architecture. Simplifying the network comes at the cost of losing optimality.
 
 \section{Related Work}
 \label{sec:related}
