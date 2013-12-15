@@ -49,38 +49,38 @@ The remainder of this article is organized as follows. Section~\ref{sec:hierarch
 
 \section{Hierarchical Controller Architecture}
 \label{sec:hierarchical}
-We propose a new control plane architecture in which controllers are arranged in the form of a tree over the physical network. Switches form the leaf nodes in the tree, while controllers form the internal nodes. An internal node acts as a switch for its parent and as a controller for its children. A node aggregates its underlying network and converts it to a switch abstraction which is then exposed to the parent controller. This switch abstraction is explained in detail in section~\ref{subsec:aggr}. A controller's view does not span the whole network but only the network of its children. A node translates instructions (forwarding rules) from its parent controller to the forwarding rules for its underlying network. Similarly, network updates from the underlying network are translated into network updates arising from one switch abstraction of the given controller and are passed on to parent controller. The translation process is explained in the following section.
+We propose a new control plane architecture in which controllers are arranged in the form of a tree over the physical network. We will start by describing an important building block of the architecture, called switch abstraction.
 
 \subsection{One switch abstraction}
 \label{subsec:aggr}
-One switch abstraction has two parts, (i) compressing the underlying network state to represent a single switch, and (ii) translating instructions from the abstract switch to the underlying network. We present these separately below.
+A controller aggregates its underlying network and behaves as one logical switch, with huge number of ports. This logical switch supports control plane protocols such as OpenFlow[ref], and can be controlled by an external entity (referred to as parent controller) to install forwarding rules. One switch abstraction has two parts, (i) compressing the underlying network state to represent a single switch, and (ii) translating instructions (forwarding rules) from the abstract switch to the underlying network. We present these separately below.
 \subsubsection{Compression}
-The primary switch abstraction comes by compressing the network into one node. Given an underlying network for a controller, the abstract switch exposed by it contains all the ports which are connected to switches outside the network. These ports form the \emph{ingress} and \emph{egress} ports for the controller. The switch abstraction maintains a list of abstract ports, which can be mapped to the ports of the underlying network. This basic abstraction is suficient for a simple control application, but we require more features for a rich and complete experience. A few such abstractions are presented below.
+The primary switch abstraction comes by compressing the network into one node. Given an underlying network for a controller, the abstract switch exposed by it contains all the ports which are connected to switches outside the network. Such ports are referred to as \emph{external} ports. Conversely, ports which are connected to ports in the same network are not exposed (hidden away from abstraction) and are referred to as \emph{internal} ports. \emph{External} ports form the \emph{ingress} and \emph{egress} ports for the abstract switch. The switch abstraction maintains a list of these abstract ports, which can be (uniquely) mapped to the ports of the underlying network. This basic abstraction is sufficient for a simple control application, but we require more features for a rich and complete experience. A few such abstractions are presented below.
 \begin{enumerate}
     \item \emph{Host compression}:
-    If the number of hosts is too large, and we consider each host as an external entity, individual hosts must be remembered by the root controller, which is extremely inefficient. Host compression can be performed in two ways, depending on the host IP distribution and the network being considered.
+    Hosts in the underlying network are considered as external entities, which are exposed as hosts connected to the abstract switch.Ports which connect to hosts are considered to be\emph{external} ports. However, if the number of hosts in the underlying network is too large, exposing a list of all hosts could result in inefficient compression. Host compression can be performed in two ways, depending on the host IP distribution and the network being considered.
     \begin{itemize}
         \item \emph{IP compression} -
-        Similar to the forwarding rules in the actual internet, if the IP addresses of the hosts are properly prefixed, a controller can compress host IPs and only provide prefixes to its parent controller. This works well only if the assignment of switches to controllers is uniform and in accordance with prefixes.
+        Similar to the forwarding rules in an internet router, if the IP addresses of the hosts are properly prefixed, a controller can compress host IPs and only provide prefixes to its parent controller. This works well only if the assignment of switches to controllers is uniform and in accordance with prefixes.
         \item \emph{Abstract host list} -
         A controller can expose an abstract host or list of hosts to its parent controller. The parent controller places rules for the abstract hosts in the peer controllers. This approach would be similar to LAN, and requires address translation while entering or leaving the underlying network. This is more flexible, but complicated, and can be used only when IP prefix compression fails.
     \end{itemize}
     \item \emph{Abstract flow table}:
-        The basic flow table in a controller is comprises of the rules placed by the parent controller. However, for a full OpenFlow functionality, we need to support counters and queries, as in OpenFlow switches. These responses, again, must be an aggregation of the network. To this end, we must be able to efficiently represent the flows from the underlying network and obtain statistics which can be exposed to the parent. We propose a data structure to maintain, aggregate and update view of the flows in section~\ref{subsubsec:aggr-data}.
+        The basic flow table in a controller is comprise of the rules placed by the parent controller. However, for a full OpenFlow functionality, we need to support counters and queries, as in OpenFlow switches. These responses, again, must be an aggregation of the network. To this end, we must be able to efficiently represent the flows from the underlying network and obtain statistics which can be exposed to the parent. We propose a data structure to maintain, aggregate and update view of the flows in section~\ref{subsubsec:aggr-data}.
 \end{enumerate}
 
 \subsubsection{Translation}
-The major task of an intermediate controller is to translate messages from its parent controller to rules that can be implemented on the underlying network. To this end, we extend the API for the control application to take in these rules as an additional input (Note: there is no standard northbound API between a controller and a control application as of today and each controller exposes its own unique API). The controller uses the underlying network state and its abstract flow table to decide the rules for its children. It forwards the packet to its parent if and only if it is unable to handle the packet with its given knowledge. Typically, for a new flow,
+The major task of a controller is to translate messages from its parent controller to forwarding rules that can be implemented on switches in the underlying network. To this end, we extend the API for the control application to take in these rules as an additional input (Note: there is no standard northbound API between a controller and a control application as of today and each controller exposes its own unique API). The controller uses the underlying network state and its abstract flow table to decide the rules for its children. It forwards the packet to its parent if and only if it is unable to handle the packet with its given knowledge. Typically, for a new flow,
 \begin{enumerate}
     \item If the destination is within the underlying network, or if the abstract flow table has rules to handle the destination, the controller places rules on the underlying network to create a flow from the origin (local host or an \emph{ingress} port) of the flow to the destination (local host or an \emph{egress} port) based on its policies.
     \item If the destination is unknown, it forwards the packet to its parent, but also holds onto a copy. Once the parent takes a decision and passes it as an OpenFlow rule, the controller translates it to the underlying network.
 \end{enumerate}
 
-[one-big-switch] and [pallete] propose algorithms to combine and translate end-to-end policies and routing policies to optimally place rules in switches. These algorithms can be used by control applications to optimally place rules, combining the abstract flow table and its local routing policies.
+[one-big-switch ref] and [pallete ref] propose algorithms to combine and translate end-to-end policies and routing policies to optimally place rules in switches. These algorithms can be used by control applications to optimally place rules, combining the abstract flow table and its local routing policies.
 
 \subsubsection{Data structures}
 \label{subsubsec:aggr-data}
-We represent the underlying network as a graph $G$ with dummy external nodes connected to each of the exposed ports. For each external node $e$, we create and maintain a directed flow graph $F_e$ rooted at $e$ as an overlay graph on $G$. $e$ here represents the \emph{ingress} port. End hosts and other external nodes act as sinks for these flows. The external nodes represent the \emph{egress} ports.
+In this section, we present data structures, maintained by a controller to translate instructions from parent controller to children switches and to translate network updates and messages from children switches to parent controller efficiently. Note that this is just one of the way in which \emph{translation} can be enforced, which we have used in our implementation. We represent the underlying network as a graph $G$ with dummy external nodes connected to each of the exposed ports. For each external node $e$, we create and maintain a directed flow graph $F_e$ rooted at $e$ as an overlay graph on $G$. $e$ here represents the \emph{ingress} port. End hosts and other external nodes act as sinks for these flows. The external nodes represent the \emph{egress} ports.
 For each pair of external nodes $e_{in}$ and $e_{out}$, we can create an aggregated flow table entry based on the flow graph $F_{e_{in}}$ for $e_{in}$. We propose this method to account for possible modifications in the packet headers along the paths (multiple paths are common based on routing policies) from the \emph{ingress} port to the \emph{egress} port which could prevent us from identifying same flows by just observing flows at the \emph{ingress} and \emph{egress} ports.
 Other data structures which would aid to simplify updates and aggregation are
 \begin{enumerate}
@@ -93,7 +93,10 @@ One main difference between an abstract switch and an actual switch is the inequ
 One major concern of routing is network modifications, mainly link failures. If the network is well connected, then an internal link failure can be handled by the local controller without affecting the parent controller. A parent controller only needs to concern if an exposed link is broken or if an underlying network is significantly broken, for example, if it was partitioned or the paths become extremely crowded. With the assumption that an underlying network capacity is greater than its exposed links, i.e. the internal network can handle full utilization of the exposed links, these concerns will be limited.
 
 \subsection{Hierarchical arrangement}
+We propose a new control plane architecture in which controllers are arranged in the form of a tree over the physical network. Switches form the leaf nodes in the tree, while controllers form the internal nodes. An internal node acts as a switch for its parent and as a controller for its children. A controller's view does not span the whole network but only the network of its children. A node translates instructions (forwarding rules) from its parent controller to the forwarding rules for its underlying network. Similarly, network updates from the underlying network are translated into network updates arising from one switch abstraction of the given controller and are passed on to parent controller.
+
 The abstraction described above represents a controller at any level of the hierarchy. The only difference between a root controller and an internal controller is the absence of incoming OpenFLow messages in the former, while the latter receives them from its parent. This simplifies the control application which can be agnostic to the hierarchical level it belongs to, as long as it can support incoming OpenFlow messages. [TODO-tree figure].
+
 
 \subsection{An example}
 \label{example}
@@ -117,26 +120,26 @@ Control application is a TE-cum-routing application. When a new flow arrives, co
 \begin{figure}[t]
 \centering
 \begin{subfigure}{.5\textwidth}
-\label{fig:path}
 \includegraphics[scale=0.3]{path}
 \caption{Application performance: path length for flows}
+\label{fig:path}
 \end{subfigure}
 
 \begin{subfigure}{.5\textwidth}
-\label{fig:util}
 \includegraphics[scale=0.3]{util}
 \caption{Application performance: Maximum link utilization for flows}
+\label{fig:util}
 \end{subfigure}
 \caption{Application performance}
 \end{figure}
 
 \begin{figure}
-\label{fig:msg}
 \includegraphics[scale=0.3]{msg}
 \caption{Communication overhead per flow}
+\label{fig:msg}
 \end{figure}
 
-We simulated the trace file for both flat and hierarchical architecture, with same topology and same assignment of task nodes for each job. We calculated two metrics: (1) The performance of control application which is measured as the length path (number of hops) assigned to flows (Figure ~\ref{fig:path}) and maximum link utilization encountered by the flow (Figure ~\ref{fig:util}). While the flat architecture gives optimal results, hierarchical architecture provides sub-optimal results. (2) Communication overhead during flow set up, which is measured in term of number of messages passed between switches and controllers as well as within controllers (Figure ~\ref{fig:msg}). The simulation assumes instant replication of network state between controllers. Results show that hierarchical architecture reduces the communication overhead between controllers by an order of magnitude while modestly deviating from optimal solution.
+We simulated the trace file for both flat and hierarchical architecture, with same topology and same assignment of task nodes for each job. We calculated two metrics: (1) The performance of control application which is measured as the length path (number of hops) assigned to flows (Figure ~\ref{fig:path}) and maximum link utilization encountered by the flow (Figure ~\ref{fig:util}). While the flat architecture gives optimal results, hierarchical architecture provides sub-optimal results. (2) Communication overhead during flow set up, which is measured in term of number of messages passed between switches and controllers as well as within controllers (Figure \ref{fig:msg}). The simulation assumes instant replication of network state between controllers. Results show that hierarchical architecture reduces the communication overhead between controllers by an order of magnitude while modestly deviating from optimal solution.
 
 \begin{table*}
 \centering
