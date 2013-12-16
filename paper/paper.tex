@@ -26,26 +26,25 @@
 \begin{document}
 \maketitle
 \begin{abstract}
-Network control plane, in Software Defined Networks (SDN), provides a global view of the physical network to control applications (such as routing), which can be developed as a centralized application rather than a distributed one. Regardless of this abstraction, the control plane itself must inevitably be a distributed system, with multiple nodes called controllers, to achieve desired level of scalability, reliability and responsiveness. 
+Network control plane, in Software Defined Networks (SDN), provides a global view of the physical network to control applications. Regardless of this abstraction, the control plane itself must inevitably be a distributed system, with multiple nodes called controllers, to achieve desired level of scalability, reliability and responsiveness. 
 
-Traditional architecture involves multiple controllers, each operating on a subset of switches and maintaining a global view of the entire network. We propose a different architecture where controllers are arranged in a hierarchy and only view a part of the network. This improves responsiveness and reduces inconsistency ........(numbers).
+Conventional control plane architecture involves multiple peer controllers, each operating on a subset of network and maintaining a global view of the entire network. We propose a different architecture where controllers are arranged in a hierarchy and only view a part of the network. Limiting the view of controllers significantly reduces communication overhead while modestly compromising on optimality. We simulated both architectures on historical Hadoop traces from Facebook and observed that hierarchical architecture reduces communication overhead by an order of magnitude (90.5\%) while deviating from optimal results by 17.4\% for routing application and 12.8\% for Traffic Engineering (TE) application. 
 
-Besides, we also propose an optimization in traditional controller architecture. We show 
+Besides, we also propose an optimization in conventional flat controller architecture and shows preliminary results on a dummy topology. 
 \end{abstract}
 
 \section{Introduction}
-Forwarding or data plane consists of a collection of forwarding elements (switches), connected to form a network, which is inherently distributed in nature. Control plane consists of a collection of control elements, which install forwarding rules on forwarding elements as dictated by control logic or application, running on control elements. Some classes of control applications are routing, traffic engineering (TE), enforcing network policies, etc. In traditional networks, there is a tight coupling and a one to one mapping between control elements and forwarding elements, with one pair on each switch. Besides, the role of control elements had been trivial, which is to merely install instructions given by control application on corresponding forwarding element as forwarding rules. It is the control application which runs distributed protocols to synchronize the state of forwarding elements. The design of these distributed protocols differs from application to application. For example, link state routing makes switches share their neighbors while distance vector routing makes switches share their routing tables.
+%Forwarding or data plane consists of a collection of forwarding elements (switches), connected to form a network, which is inherently distributed in nature. Control plane consists of a collection of control elements, which install forwarding rules on forwarding elements as dictated by control logic or application, running on control elements. Some classes of control applications are routing, traffic engineering (TE), enforcing network policies, etc. 
+In traditional networks, there is a tight coupling and a one to one mapping between control elements and forwarding elements, with one pair on each switch. Besides, the role of control elements had been trivial, which is to merely install instructions given by control application on corresponding forwarding element as forwarding rules. It is the control application which runs distributed protocols to synchronize the state of forwarding elements. The design of these distributed protocols differs from application to application. For example, link state routing makes switches share their neighbors while distance vector routing makes switches share their routing tables.
 
 The emergence of Software Defined Networks (SDN) has induced a separation between forwarding and control elements and has significantly improved the role of the control plane. The control elements may no longer be present on the switches but move to a separate device called a controller, and use predefined protocol such as OpenFlow [openflow-ref], to install forwarding rules. There may be a one-to-many mapping from controllers to switches. At one extreme, control plane may provide a control application with the global network view, which can then be implemented as a centralized application, rather than a distributed one. Regardless of this abstraction, the control plane itself must inevitably be a distributed system, with multiple controllers, to achieve desired level of scalability, reliability and responsiveness.
 
-Conventional control plane architectures involve multiple controllers, where each controller operates on a subset of switches and maintains a global view of the entire network, which is exposed to the control application. Instructions (forwarding rules) from control application are sent to target switches directly or through other controllers. Underlying network state is shared with other controllers through distributed state dissemination frameworks such as distributed transactional databases or Distributed Hash Tables (DHT). Consequently, this introduces a trade-off between network state inconsistency and responsiveness. Results from [logically-centralized-ref] suggests that control state inconsistency significantly degrades performance of logically centralized control applications agnostic to the underlying state distribution.
+Conventional control plane architectures involve multiple peer controllers, where each controller operates on a subset of switches and maintains a global view of the entire network, which is exposed to the control application. We referred to such an architecture as \emph{flat controller architecture}. Underlying network state is shared with other controllers through distributed state dissemination frameworks such as distributed transactional databases or Distributed Hash Tables (DHT). Consequently, such an architecture results in huge communication overhead between controllers, which may hinders the scalability of the system. Besides, network state inconsistency is quite common in flat architecture which degrades the application performance significantly [logically ref TODO].
 
-The state inconsistency problem arises from the fact that each controller tries to maintain the complete global view of the network. Besides, we believe that it is difficult (from scalability point of view) for a controller (a COTS machine) to handle the entire network view. Motivated by these observations, we propose a hierarchical controller architecture. We show ....................   
- 
+The state inconsistency and huge communication overhead problem arises from the fact that each controller tries to maintain the complete global view of the network. Motivated by this observation, we propose a hierarchical controller architecture, in which controllers are arranged in a tree structure and exposes a switch abstraction to it's parent. We show that hierarchical architecture significantly reduces the communication overhead between controllers while modestly compromising on optimality.     
 
 \paragraph{Outline}
-The remainder of this article is organized as follows. Section~\ref{sec:hierarchical} presents Hierarchical Controller Architecture. We present the experimental results in section~\ref{sec:eval}. In section~\ref{sec:timestamps}, we present an optimization to conventional controller architecture to help improve the performance of application even if states between controllers is inconsistent. Related work is presented in section~\ref{sec:related}. We discuss ............Our new and exciting results are described in Section~\ref{sec:eval}.
-
+The remainder of this article is organized as follows. Section~\ref{sec:hierarchical} presents Hierarchical Controller Architecture. We discuss implementation details and present experimental results in section~\ref{sec:eval}. In section~\ref{sec:timestamps}, we present an optimization to conventional flat controller architecture. We discuss pros and cons of proposed architecture in section \ref{sec:discuss}. Related work is discussed in section~\ref{sec:related}. We conclude the paper in section \ref{sec:conc}, followed by future work in section \ref{sec:future}.  
 
 \section{Hierarchical Controller Architecture}
 \label{sec:hierarchical}
@@ -165,12 +164,13 @@ Results show that hierarchical architecture reduces the communication overhead b
 
 \begin{table*}
 \centering
-\begin{tabular}{| L{5cm} | L{3cm} | L{3cm} | L{5cm} |}
+\begin{tabular}{| L{4cm} | L{2cm} | L{3cm} | L{4cm} |}
 \hline
 & {Average path length} & {Average maximum utilization} & {Average communication overhead per flow} \\ \hline
 Flat architecture & 7.81 & 24.62 & 153.54 \\ \hline
 Hierarchical architecture & 9.17 & 27.78 & 14.52 \\ \hline
 \end{tabular}
+\caption{Comparison between performance of Flat and Hierarchical architecture.}
 \end{table*}%
 
 
@@ -238,11 +238,12 @@ On a similar but different note, B4[B4-ref] uses a two level hierarchy, where th
 We presented a hierarchical controller architecture where each controller exposes a switch abstraction to its parent and discussed its advantages and disadvantages. We implemented a simulator with a flexible architecture and simulated workloads using both hierarchical and flat distributed controller architectures. We demonstrated that the hierarchical architecture works very well to improve scalability and reduce communication overhead of the system, while modestly compromising on optimality. We believe that this architecture would be ideal to handle really large networks and hope that it will be used in the future.
 
 \section{Future work}
+\label{sec:future}
 In the future, we want to modify an existing OpenFlow controller like FloodLight or Open DayLight to provide support for hierarchy. We would also like to develop more complex control applications which can be run on these controllers.
 
 We also want to generalize and share our simulator for quick prototyping and testing of flexible architectures.
 
-We want to test our timestamps solution on real workloads and implement it as a module in existing controllers.
+We want to test our timestamp optimization on real workloads and implement it as a module in existing controllers.
 
 \section{Acknowledgements}
 \label{sec:ack}
