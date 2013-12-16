@@ -175,9 +175,34 @@ Hierarchical architecture & 9.17 & 27.78 & 14.52 \\ \hline
 
 
 
-\section{Timestamps}
+\section{Timestamps: An optimization for flat controller architecture}
 \label{sec:timestamps}
-We worked hard, and achieved very little.
+In this section, we propose an optimization for flat controller architecture. 
+
+\subsection{System model}
+There are multiple peer controllers, managing different parts of network and keeping a global view of entire network. Network states are replicated between controllers, with some replication lag i.e. at a given instant of time network state of two controllers may be different or inconsistent. Network state could include a range of characteristics of underlying network including, topology, link utilizations, routing tables on switches. However, for the purpose of this section, we will assume that network state only consists of link utilizations. Network state on a given controller consists of latest data for links that belong to it's domain, while it may contain stale data for other links. The topology is assumed to be static and is assumed to be known by all controllers. Source routing is used to route packets/flows to destination: when a new flow arrives at the ingress switch, it is sent to the parent controller, which calculates the route using control application and network state (at that point of time). This route is marked on the packet/flow.
+  
+\subsection{Optimization}
+Let's say there are \emph{n} controller domains. Each controller domain, $i$ maintains a vector timestamp $T_{i}[1...n]$, where $T_{i}[j]$ contains the latest revision number of domain $j$'s network state (link utilizations), seen by domain $i$. Whenever links utilization is revised for links in domain $i$, the controller increments it's own revision number $T_{i}[i]$ in the timestamp. Timestamps are sent along with network state to other controllers for replication. During replication, a controller revises it's timestamp with the incoming timestamp by taking maximum for each entry between the two timestamps. This is a general technique for any replicated system. Each router is updated with the latest timestamp of it's parent controller. 
+
+When a route is being set up, the controller prints it's timestamp on packet header along with the route. When a router in a domain $i$ receives a flow with timestamp $T_{j}$ , it checks for any index k such that $T_{j} [k] < T_{i} [k]$. For all such index's, it recalculate the part of the route which belongs to domain $k$ using it's own network state. This is because these parts of existing path were calculated on stale network state.  
+  
+\subsection{Evaluation}
+We used a dummy topology to show the benefits of timestamps. There are three controller domains 1, 2 and 3, with domain 2 connecting the other two domains. Flows arrive randomly between domain 1 and domain 3 and are routed through domain 2. Link Balancer Controller [logically - ref] runs on each controller as a control application: when a new flow arrives, a path which minimizes the maximum link utilization is assigned to the flow.
+
+\begin{figure}
+
+\begin{subfigure}{.5\textwidth}
+ \includegraphics[scale=0.4]{chart_1}
+\end{subfigure}
+\begin{subfigure}{.5\textwidth}
+ \includegraphics[scale=0.4]{chart_2}
+\end{subfigure}
+\caption{Comparison of Link utilizations with/without Timestamp optimization}
+\label{fig:timestamp}
+\end{figure}
+
+Results (Figure \ref{fig:timestamp}) shows that using timestamp could improve control application's performance. However, these are only preliminary results on a dummy topology and does not give any indication of the magnitude of improvement. We will evaluate timestamp optimization on a bigger topology with real world flow arrival data in the future. 
 
 \section{Discussion}
 \label{sec:discuss}
@@ -188,7 +213,7 @@ Hierarchical architecture provides several benefits.
     \item As long as a control application follows the protocol, the internal routing mechanisms do not create any inconsistencies. In flat architecture where each controller takes a global decision but acts on a local scope, each controller must behave and take decisions exactly the same way. Thus, with our architecture, different controllers can run different control applications, without affecting the network. This has several benefits in itself.
         \begin{enumerate}
             \item A control application can be updated independent of the remaining network and not cause global disruptions. There might, however, be flow setup delays which are to be expected.
-            \item Different routing stategies and network policies can be implemented in different segments of the network. For example, one controller could route using MPLS, while another uses destination addresses.
+            \item Different routing strategies and network policies can be implemented in different segments of the network. For example, one controller could route using MPLS, while another uses destination addresses.
             \item Networks with different managements can be brought together using this architecture. Each network can follow its own network policies and selectively expose its \emph{ingress} and \emph{egress} ports to the parent controller.
         \end{enumerate}
     \item The view is simplified and thus decisions can be taken quickly, only for a small number of nodes at each level.
