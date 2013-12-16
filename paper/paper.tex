@@ -109,20 +109,38 @@ Let's consider an example to understand the benefits of hierarchical architectur
 
 \section{Evaluation}
 \label{sec:eval}
-We simulated a dummy control application on both hierarchical as well as flat controller architecture, with same network topology and flow arrival distribution. The details of simulation, metrics and results are presented in this section.
+We simulated a dummy control application on both hierarchical and flat controller architectures, with same network topology and flow arrival distribution. The details of simulation, metrics and results are presented in this section.
 
 \subsection{Implementation}
 \label{sec:implementation}
-We wrote our own simulator, which is available at [TODO REF simulator]. We did not use an existing simulator/controller such as Mininet with Floodlight [TODO ref] for the following two reasons: (1) Existing controller lacks the support for flexible controller architecture and are not suitable for hierarchical arrangement of controllers. Modifying existing controllers such as Floodlight to add support for One-switch abstraction (section~\ref{subsec:aggr}), is not a good idea because it requires code/design changes in their primitive modules. Besides, we were not looking for a feature rich controller at that point of time. (2) Existing simulators do not provide controls to regulate replication between controllers or to measure communication overhead (number of messages exchanged ) between controllers, which we needed for evaluation of control plane architecture. Given the above requirements, it seemed easier to write a simulator which provides one-switch abstraction support for the controllers. There are three prime interfaces: (1) {\it Switch Data Plane:} It is implemented by a switch to create forwarding elements to handle packet forwarding according to forwarding rules. (2) {\it Switch Control Plane:} It is implemented by both controllers and switches and is used to establish connections to parent controllers to send packets which do not match any forwarding rule and to receive forwarding rules from parent controller. (3) {\it Controller Control Plane:} It is implemented by controllers to establish connections to children switches/controllers. It is used to receive packets which do not match any forwarding rule and to send forwarding rules to children switches/controllers.Simulator defines two networks: (1) {\t Data Network:} This network consists of all switches (and no controller) connected through links. (2) {\it Management Network:} This network consists of all controllers and switches connected through Controller - Switch Control Plane interfaces. This network allows flexible controller architecture, which could be hierarchical or flat.
+We wrote our own simulator, which is available at [TODO REF simulator]. We did not use an existing simulator/controller such as Mininet with Floodlight [TODO ref] for the following two reasons: (1) Existing controllers lack the support for flexible controller architecture and are not suitable for hierarchical arrangement of controllers. Modifying existing controllers such as Floodlight to add support for one-switch abstraction (section~\ref{subsec:aggr}), is not a good idea because it requires code/design changes in their primitive modules. Besides, we were not looking for a feature rich controller at that point of time. (2) Existing simulators do not provide controls to regulate replication between controllers or to measure communication overhead (number of messages exchanged ) between controllers, which we needed for evaluation of control plane architecture. Given the above requirements, writing a simulator which provides one-switch abstraction support for the controllers was the best option.
 
-To observe the effect of different architecture in real world applications, we used SWIM project [TODO ref swim], which provides synthetic representative test workloads  by sampling historical MapReduce cluster traces using [swim paper ref TODO]. The original trace comes from historical Hadoop traces on a 600 machine cluster at Facebook and spans 6 months, and contains roughly 1 million jobs. The representative trace file contains ~6000 jobs. The trace was simulated with a cluster of 600 machines (as in the original cluster) connected through a network of 200 switches and 10 Gbps links. The cluster is divided into 10 control domains, with 60 hosts, 20 switches and one controller for each domain. Each switch in a domain is connected to 1 to 4 switches within the same domain, with degree being chosen randomly. Each domain contains two Top-of-the-rack switches which inter-connects domains. For hierarchical architecture, there are 11 controllers: 1 controller per domain and one root controllers which manages the other 10 controllers. While flat architecture consists of 10 peer controllers, one or each domain.
+There are three prime interfaces:
+\begin{enumerate}
+    \item {\it Switch Data Plane:} It is implemented by a switch to create forwarding elements to handle packet forwarding according to forwarding rules.
+    \item {\it Switch Control Plane:} It is implemented by both controllers and switches and is used to establish connections with parent controllers to send packets which do not match any forwarding rule, to receive forwarding rules and send/receive other OpenFLow-like messages from parent controller.
+    \item {\it Controller Control Plane:} It is implemented by controllers to establish connections to child switches/controllers. It is used to receive packets which do not match any forwarding rule and to send forwarding rules to child switches/controllers.
+\end{enumerate}
+Simulator defines two networks:
+\begin{enumerate}
+    \item {\it Data Network:} This network consists of all switches (and no controllers) connected through links.
+    \item {\it Management Network:} This network consists of all controllers and switches connected through Controller - Switch Control Plane interfaces. This network allows flexible controller architecture, which could be hierarchical or flat.
+\end{enumerate}
 
-Control application is a TE-cum-routing application. When a new flow arrives, control application finds the path with minimum maximum utilization and sets up forwarding rules (based on IP destination and incoming ports) along the path. If multiple such paths exists (which is frequently the case, due to big network), shortest path (in term of number of hops) is chosen. This application runs on each controller in both hierarchical and flat architecture. However, in the hierarchical architecture, the view of application is limited and may consists of controllers or switches as forwarding elements, while in the flat architecture, control application is presented with global view of the network. For simplicity, we have kept network topology as static i.e. links/nodes do not fail and/or created during the simulation. For each Hadoop job, a dummy MapReduce application choses directory, map and reduce nodes randomly in the network, thus, creating a number of flows which are handled by Control application running on controllers. The duration of flow depends on the bytes needed to transfer and assigned rates.            
+To observe the effect of different architectures in real world applications, we used SWIM project [TODO ref swim], which provides synthetic representative test workloads  by sampling historical MapReduce cluster traces using [swim paper ref TODO]. The original trace comes from historical Hadoop traces on a 600 machine cluster at Facebook and spans $6$ months, and contains roughly $1$ million jobs. The representative trace file contains $\approx 6000$ jobs. The trace was simulated with a cluster of $600$ machines (as in the original cluster) connected through a network of $200$ switches and $10$ Gbps links. The cluster is divided into $10$ control domains, with $60$ hosts, $20$ switches and one controller for each domain. Each switch in a domain is connected to $1$ to $4$ switches within the same domain, with degree being chosen randomly. Each domain contains $2$ top-of-the-rack switches which inter-connect domains. For hierarchical architecture, there are $11$ controllers: $1$ controller per domain and $1$ root controller which manages the other $10$ controllers. While flat architecture consists of $10$ peer controllers, one for each domain.
+
+Control application is a TE-cum-routing application. When a new flow arrives, control application finds the path with minimum maximum utilization and sets up forwarding rules (based on IP destination and incoming ports) along the path. If multiple such paths exist (which is frequently the case, due to a large network), shortest path (in term of number of hops) is chosen. This application runs on each controller in both hierarchical and flat architecture. However, in the hierarchical architecture, the view of application is limited and may consist of controllers or switches as forwarding elements, while in the flat architecture, control application is presented with global view of the network. For simplicity, we have kept network topology as static i.e. links/nodes do not fail and/or are not created during the simulation. For each Hadoop job, a dummy MapReduce application choses a directory, map and reduce nodes randomly in the network, thus, creating a number of flows which are handled by the control application running on controllers. The duration of flows depends on the bytes needed to transfer and the assigned rates.            
 
 \subsection{Results}
 \label{subsec:results}
+We simulated the trace file for both flat and hierarchical architectures, with the same network topology and the same assignment of task nodes for each job. We calculated two metrics:
+\begin{enumerate}
+    \item The performance of control application which is measured as the length of the path (number of hops) assigned to flows (Figure ~\ref{fig:path}) and maximum link utilization encountered by the flow (Figure ~\ref{fig:util}). While the flat architecture gives optimal results, hierarchical architecture provides sub-optimal results.
+    \item Communication overhead during flow set up, which is measured in term of number of messages passed between switches and controllers as well as within controllers (Figure ~\ref{fig:msg}). The simulation assumes instant replication of network state between controllers.
+\end{enumerate}
+Results show that hierarchical architecture reduces the communication overhead between controllers by an order of magnitude while modestly deviating from optimal solution.
 
-\begin{figure}[t]
+\begin{figure}[h]
 \centering
 \begin{subfigure}{.5\textwidth}
 \includegraphics[scale=0.3]{path}
@@ -138,13 +156,12 @@ Control application is a TE-cum-routing application. When a new flow arrives, co
 \caption{Application performance}
 \end{figure}
 
-\begin{figure}
+\begin{figure}[h]
 \includegraphics[scale=0.3]{msg}
 \caption{Communication overhead per flow}
 \label{fig:msg}
 \end{figure}
 
-We simulated the trace file for both flat and hierarchical architecture, with same topology and same assignment of task nodes for each job. We calculated two metrics: (1) The performance of control application which is measured as the length path (number of hops) assigned to flows (Figure ~\ref{fig:path}) and maximum link utilization encountered by the flow (Figure ~\ref{fig:util}). While the flat architecture gives optimal results, hierarchical architecture provides sub-optimal results. (2) Communication overhead during flow set up, which is measured in term of number of messages passed between switches and controllers as well as within controllers (Figure \ref{fig:msg}). The simulation assumes instant replication of network state between controllers. Results show that hierarchical architecture reduces the communication overhead between controllers by an order of magnitude while modestly deviating from optimal solution.
 
 \begin{table*}
 \centering
@@ -166,7 +183,7 @@ We worked hard, and achieved very little.
 \label{sec:discuss}
 Hierarchical architecture provides several benefits.
 \begin{enumerate}
-    \item Compared to a flat distributed controller architecture, this architecture will have faster flow setup times, in general. In a flat architecture, flow setup requires one round trip between switch and controller for each of the controller domains (say $n$) the packet travels through. However, in a hierarchical architecture, the packet is forwarded up to a level where the entire path is under one controller and then the rules are installed in all the controllers. On average, this is $O(log\;n)$ levels up and thus takes significantly less time to setup. Worst case, however, could be when the the two nodes are close to each other physically but belong to different controllers up till the root.
+    \item Compared to a flat distributed controller architecture, this architecture will have faster flow setup times, in general. In a flat architecture, flow setup requires one round trip between switch and controller for each of the controller domains (say $n$) the packet travels through. However, in a hierarchical architecture, the packet is forwarded up to a level where the entire path is under one controller and then the rules are installed in all the controllers. On average, this is $O(log\;n)$ levels up and thus takes significantly less time to setup. Worst case, however, could be when the two nodes are close to each other physically but belong to different controllers up till the root.
     \item Link modifications are in general handled locally by the immediate controller and other controllers are not affected by it. So, there are in general no messages or state inconsistencies, as these networks do not have a global state to create inconsistencies!
     \item As long as a control application follows the protocol, the internal routing mechanisms do not create any inconsistencies. In flat architecture where each controller takes a global decision but acts on a local scope, each controller must behave and take decisions exactly the same way. Thus, with our architecture, different controllers can run different control applications, without affecting the network. This has several benefits in itself.
         \begin{enumerate}
@@ -177,11 +194,11 @@ Hierarchical architecture provides several benefits.
     \item The view is simplified and thus decisions can be taken quickly, only for a small number of nodes at each level.
 \end{enumerate}
 
-This architecture, however, in not a panacea for scalable distributed controller architecture. Simplifying the network comes at the cost of losing optimality.
+This architecture, however, in not a panacea for scalable distributed controller architectures as simplifying the network comes at the cost of losing optimality. We still believe that the reduction is performance is modest compared to the advantages it offers.
 
 \section{Related Work}
 \label{sec:related}
-Owing to the performance, reliability and scalability issues faced by single controller architectures, distributed controller architectures have been studied and implemented in various flavors. Most of them aim for a logically centralized global view of the network, while Some of them are discussed in this discussion.
+Owing to the performance, reliability and scalability issues faced by single controller architectures, distributed controller architectures have been studied and implemented in various flavors. Most of them aim for a logically centralized global view of the network, while other provide a distributed framework and leave design choices to the control application. Some of them are discussed in this discussion.
 
 Hyperflow[Hyperflow-ref] has a logically centralized but physically distributed controller architecture. It localizes decision making in individual controllers by passively synchronizing the global network view. The control application is agnostic to the underlying architecture and takes a global decision, though the effect is local. The events are propagated using a publish/subscribe messaging paradigm.
 
@@ -190,8 +207,17 @@ Onix[Onix ref] presents a platform on top of which a network control plane can b
 Kandoo[Kandoo-ref] takes a slightly similar approach to our own and presents a two layer hierarchy of controllers: (i) the bottom layer is a group of controllers with no interconnection and no knowledge of the nework-wide state, and (ii) the top layer is a logically centralized controller that maintains network-wide state. Bottom layer runs a local application for its underlying network, while the top layer subscribes to changes from the bottom layer. Top layer view is subscription dependent and the architecture cannot be used in a generic fasion.
 
 On a similar but different note, B4[B4-ref] uses a two level hierarchy, where the site controllers view their local network and aggregate flows to the higher level centralized controller which performs TE. Though the paper talks about a very particular implementation, it demonstrates in practice the benefits of the generic principle of our design.
+
 \section{Conclusion}
 \label{sec:conc}
+We presented a hierarchical controller architecture where each controller exposes a switch abstraction to its parent and discussed its advantages and disadvantages. We implemented a simulator with a flexible architecture and simulated workloads using both hierarchical and flat distributed controller architectures. We demonstrated that the hierarchical architecture works very well to improve scalability and reduce communication overhead of the system, while modestly compromising on optimality. We believe that this architecture would be ideal to handle really large networks and hope that it will be used in the future.
+
+\section{Future work}
+In the future, we want to modify an existing OpenFlow controller like FloodLight or Open DayLight to provide support for hierarchy. We would also like to develop more complex control applications which can be run on these controllers.
+
+We also want to generalize and share our simulator for quick prototyping and testing of flexible architectures.
+
+We want to test our timestamps solution on real workloads and implement it as a module in existing controllers.
 
 \section{Acknowledgements}
 \label{sec:ack}
