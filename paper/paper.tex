@@ -60,7 +60,7 @@ The primary switch abstraction comes by compressing the network into one node. G
     Hosts in the underlying network are considered as external entities, which are exposed as hosts connected to the abstract switch.Ports which connect to hosts are considered to be\emph{external} ports. However, if the number of hosts in the underlying network is too large, exposing a list of all hosts could result in inefficient compression. Host compression can be performed in two ways, depending on the host IP distribution and the network being considered.
     \begin{itemize}
         \item \emph{IP compression} -
-        Similar to the forwarding rules in an internet router, if the IP addresses of the hosts are properly prefixed, a controller can compress host IPs and only provide prefixes to its parent controller. This works well only if the assignment of switches to controllers is uniform and in accordance with prefixes.
+        Similar to the forwarding rules in an Internet router, if the IP addresses of the hosts are properly prefixed, a controller can compress host IPs and only provide prefixes to its parent controller. This works well only if the assignment of switches to controllers is uniform and in accordance with prefixes.
         \item \emph{Abstract host list} -
         A controller can expose an abstract host or list of hosts to its parent controller. The parent controller places rules for the abstract hosts in the peer controllers. This approach would be similar to LAN, and requires address translation while entering or leaving the underlying network. This is more flexible, but complicated, and can be used only when IP prefix compression fails.
     \end{itemize}
@@ -94,7 +94,7 @@ One major concern of routing is network modifications, mainly link failures. If 
 \subsection{Hierarchical arrangement}
 We propose a new control plane architecture in which controllers are arranged in the form of a tree over the physical network as shown in figure ~\ref{fig:hierarchy}. Switches form the leaf nodes in the tree, while controllers form the internal nodes. An internal node acts as a switch for its parent and as a controller for its children. A controller's view does not span the whole network but only the network of its children. A node translates instructions (forwarding rules) from its parent controller to the forwarding rules for its underlying network. Similarly, network updates from the underlying network are translated into network updates arising from one switch abstraction of the given controller and are passed on to parent controller.
 
-The abstraction described above represents a controller at any level of the hierarchy. The only difference between a root controller and an internal controller is the absence of incoming OpenFLow messages in the former, while the latter receives them from its parent. This simplifies the control application which can be agnostic to the hierarchical level it belongs to, as long as it can support incoming OpenFlow messages.
+The abstraction described above represents a controller at any level of the hierarchy. The only difference between a root controller and an internal controller is the absence of incoming OpenFlow messages in the former, while the latter receives them from its parent. This simplifies the control application which can be agnostic to the hierarchical level it belongs to, as long as it can support incoming OpenFlow messages.
 
 \begin{figure}
 \includegraphics[scale=0.5]{hierarchy}
@@ -117,7 +117,7 @@ We wrote our own simulator, which is available at \cite{simulator}. We did not u
 There are three prime interfaces:
 \begin{enumerate}
     \item {\it Switch Data Plane:} It is implemented by a switch to create forwarding elements to handle packet forwarding according to forwarding rules.
-    \item {\it Switch Control Plane:} It is implemented by both controllers and switches and is used to establish connections with parent controllers to send packets which do not match any forwarding rule, to receive forwarding rules and send/receive other OpenFLow-like messages from parent controller.
+    \item {\it Switch Control Plane:} It is implemented by both controllers and switches and is used to establish connections with parent controllers to send packets which do not match any forwarding rule, to receive forwarding rules and send/receive other OpenFlow-like messages from parent controller.
     \item {\it Controller Control Plane:} It is implemented by controllers to establish connections to child switches/controllers. It is used to receive packets which do not match any forwarding rule and to send forwarding rules to child switches/controllers.
 \end{enumerate}
 Simulator defines two networks:
@@ -229,7 +229,7 @@ Hyperflow\cite{hyperflow} has a logically centralized but physically distributed
 
 Onix\cite{onix} presents a platform on top of which a network control plane can be implemented as a distributed system. Control planes written within Onix operate on a global view of the network and use basic state distribution primitives provided by the platform. Thus Onix provides a general distributed state management API for control plane implementations, but leaves the decision making and trade-offs among consistency, durability and scalability to the control applications. This makes the design, deployment, modification and verification of control applications difficult and cost prohibitive.
 
-Kandoo\cite{kandoo} takes a slightly similar approach to our own and presents a two layer hierarchy of controllers: (i) the bottom layer is a group of controllers with no interconnection and no knowledge of the nework-wide state, and (ii) the top layer is a logically centralized controller that maintains network-wide state. Bottom layer runs a local application for its underlying network, while the top layer subscribes to changes from the bottom layer. Top layer view is subscription dependent and the architecture cannot be used in a generic fasion.
+Kandoo\cite{kandoo} takes a slightly similar approach to our own and presents a two layer hierarchy of controllers: (i) the bottom layer is a group of controllers with no interconnection and no knowledge of the network-wide state, and (ii) the top layer is a logically centralized controller that maintains network-wide state. Bottom layer runs a local application for its underlying network, while the top layer subscribes to changes from the bottom layer. Top layer view is subscription dependent and the architecture cannot be used in a generic fashion.
 
 On a similar but different note, B4\cite{b4} uses a two level hierarchy, where the site controllers view their local network and aggregate flows to the higher level centralized controller which performs TE. Though the paper talks about a very particular implementation, it demonstrates in practice the benefits of the generic principle of our design.
 
