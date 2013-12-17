@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.1415926-2.4-1.40.13 (MiKTeX 2.9) (preloaded format=pdflatex 2013.3.3)  17 DEC 2013 23:10
+This is pdfTeX, Version 3.1415926-2.4-1.40.13 (MiKTeX 2.9) (preloaded format=pdflatex 2013.3.3)  17 DEC 2013 23:22
 entering extended mode
 **C:/Users/IBM_ADMIN/Downloads/ACN/ACN/poster_new/conference_poster_4.tex
 (C:/Users/IBM_ADMIN/Downloads/ACN/ACN/poster_new/conference_poster_4.tex
@@ -769,24 +769,24 @@ Package caption Info: float package is loaded.
 Package caption Info: subfigure package is loaded.
 Package caption Info: wrapfig package is loaded.
 Package caption Info: End \AtBeginDocument code.
-<figures/logo.png, id=21, 1401.235pt x 521.95pt>
-File: figures/logo.png Graphic file (type png)
- <use figures/logo.png>
-Package pdftex.def Info: figures/logo.png used on input line 83.
-(pdftex.def)             Requested size: 107.37587pt x 40.0pt.
-File: figures/logo.png Graphic file (type png)
+<figures/UIUC_logo.png, id=21, 185.2521pt x 239.9364pt>
+File: figures/UIUC_logo.png Graphic file (type png)
 
-<use figures/logo.png>
-Package pdftex.def Info: figures/logo.png used on input line 83.
-(pdftex.def)             Requested size: 107.37587pt x 40.0pt.
+<use figures/UIUC_logo.png>
+Package pdftex.def Info: figures/UIUC_logo.png used on input line 83.
+(pdftex.def)             Requested size: 61.76656pt x 80.0pt.
 LaTeX Font Info:    Font shape `T1/ppl/bx/n' in size <10> not available
 (Font)              Font shape `T1/ppl/b/n' tried instead on input line 83.
 LaTeX Font Info:    Font shape `T1/ppl/bx/n' in size <24.88> not available
 (Font)              Font shape `T1/ppl/b/n' tried instead on input line 83.
 LaTeX Font Info:    Font shape `T1/ppl/bx/sc' in size <24.88> not available
 (Font)              Font shape `T1/ppl/b/sc' tried instead on input line 83.
-LaTeX Font Info:    Try loading font information for U+msa on input line 83.
 
+Underfull \hbox (badness 10000) in paragraph at lines 83--83
+[]\T1/ppl/b/sc/24.88 Hierarchical Con-troller Ar-chi-tec-ture in
+ []
+
+LaTeX Font Info:    Try loading font information for U+msa on input line 83.
 ("C:\Program Files (x86)\MiKTeX 2.9\tex\latex\amsfonts\umsa.fd"
 File: umsa.fd 2009/06/22 v3.00 AMS symbols A
 )
@@ -815,7 +815,7 @@ Underfull \hbox (badness 10000) in paragraph at lines 139--139
 
  []
 
-<figures/hierarchy.pdf, id=24, 407.31702pt x 320.3669pt>
+<figures/hierarchy.pdf, id=23, 407.31702pt x 320.3669pt>
 File: figures/hierarchy.pdf Graphic file (type pdf)
 
 <use figures/hierarchy.pdf>
@@ -834,19 +834,19 @@ Underfull \hbox (badness 1019) in paragraph at lines 148--148
 Missing character: There is no ; in font nullfont!
 Missing character: There is no ; in font nullfont!
 Missing character: There is no ; in font nullfont!
-<figures/msg.png, id=25, 642.4pt x 481.8pt>
+<figures/msg.png, id=24, 642.4pt x 481.8pt>
 File: figures/msg.png Graphic file (type png)
  <use figures/msg.png>
 Package pdftex.def Info: figures/msg.png used on input line 181.
 (pdftex.def)             Requested size: 192.72148pt x 144.5411pt.
 
-<figures/path.png, id=26, 642.4pt x 481.8pt>
+<figures/path.png, id=25, 642.4pt x 481.8pt>
 File: figures/path.png Graphic file (type png)
  <use figures/path.png>
 Package pdftex.def Info: figures/path.png used on input line 181.
 (pdftex.def)             Requested size: 192.72148pt x 144.5411pt.
 
-<figures/util.png, id=27, 642.4pt x 481.8pt>
+<figures/util.png, id=26, 642.4pt x 481.8pt>
 File: figures/util.png Graphic file (type png)
  <use figures/util.png>
 Package pdftex.def Info: figures/util.png used on input line 181.
@@ -863,16 +863,17 @@ Missing character: There is no ; in font nullfont!
  [2
 
 {C:/ProgramData/MiKTeX/2.9/pdftex/config/pdftex.map} <C:/Users/IBM_ADMIN/Downlo
-ads/ACN/ACN/poster_new/figures/logo.png> <C:/Users/IBM_ADMIN/Downloads/ACN/ACN/
-poster_new/figures/hierarchy.pdf> <C:/Users/IBM_ADMIN/Downloads/ACN/ACN/poster_
-new/figures/msg.png> <C:/Users/IBM_ADMIN/Downloads/ACN/ACN/poster_new/figures/p
-ath.png> <C:/Users/IBM_ADMIN/Downloads/ACN/ACN/poster_new/figures/util.png>]
+ads/ACN/ACN/poster_new/figures/UIUC_logo.png> <C:/Users/IBM_ADMIN/Downloads/ACN
+/ACN/poster_new/figures/hierarchy.pdf> <C:/Users/IBM_ADMIN/Downloads/ACN/ACN/po
+ster_new/figures/msg.png> <C:/Users/IBM_ADMIN/Downloads/ACN/ACN/poster_new/figu
+res/path.png> <C:/Users/IBM_ADMIN/Downloads/ACN/ACN/poster_new/figures/util.png
+>]
 (C:\Users\IBM_ADMIN\Downloads\ACN\ACN\poster_new\conference_poster_4.aux) ) 
 Here is how much of TeX's memory you used:
- 14848 strings out of 493921
- 285730 string characters out of 3144865
- 347789 words of memory out of 3000000
- 17824 multiletter control sequences out of 15000+200000
+ 14845 strings out of 493921
+ 285597 string characters out of 3144865
+ 346753 words of memory out of 3000000
+ 17821 multiletter control sequences out of 15000+200000
  23953 words of font info for 44 fonts, out of 3000000 for 9000
  841 hyphenation exceptions out of 8191
  63i,12n,92p,479b,952s stack positions out of 5000i,500n,10000p,200000b,50000s
@@ -883,9 +884,9 @@ s (x86)/MiKTeX 2.9/fonts/type1/public/amsfonts/cm/cmmi12.pfb><C:/Program Files
 86)/MiKTeX 2.9/fonts/type1/public/amsfonts/cm/cmti12.pfb><C:/Program Files (x86
 )/MiKTeX 2.9/fonts/type1/urw/palatino/uplb8a.pfb><C:/Program Files (x86)/MiKTeX
  2.9/fonts/type1/urw/palatino/uplr8a.pfb>
-Output written on conference_poster_4.pdf (1 page, 117132 bytes).
+Output written on conference_poster_4.pdf (1 page, 144022 bytes).
 PDF statistics:
- 65 PDF objects out of 1000 (max. 8388607)
+ 63 PDF objects out of 1000 (max. 8388607)
  0 named destinations out of 1000 (max. 500000)
  146 words of extra memory for PDF output out of 10000 (max. 10000000)
 
