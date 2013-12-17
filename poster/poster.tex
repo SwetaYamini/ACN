@@ -39,6 +39,7 @@
 \usepackage{float}
 \usepackage[it]{subfigure}
 \usepackage{epstopdf}
+ \usepackage{tabularx}
 
 \begin{document}
 
@@ -73,74 +74,38 @@
 
 \begin{multicols}{2} % This is how many columns your poster will be broken into, a portrait poster is generally split into 2 columns
 
-%----------------------------------------------------------------------------------------
-%	ABSTRACT
-%----------------------------------------------------------------------------------------
 
-%\color{Navy} % Navy color for the abstract
-%
-%\begin{abstract}
-%
-%Sed fringilla tempus hendrerit. Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia Curae; Etiam ut elit sit amet metus lobortis consequat sit amet in libero. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Phasellus vel sem magna. Nunc at convallis urna. isus ante. Pellentesque condimentum dui. Etiam sagittis purus non tellus tempor volutpat. Donec et dui non massa tristique adipiscing. Quisque vestibulum eros eu. Phasellus imperdiet, tortor vitae congue bibendum, felis enim sagittis lorem, et volutpat ante orci sagittis mi. Morbi rutrum laoreet semper. Morbi accumsan enim nec tortor consectetur non commodo nisi sollicitudin. Proin sollicitudin. Pellentesque eget orci eros. Fusce ultricies, tellus et pellentesque fringilla, ante massa luctus libero, quis tristique purus urna nec nibh.
-%
-%\end{abstract}
 
-%----------------------------------------------------------------------------------------
-%	INTRODUCTION
-%----------------------------------------------------------------------------------------
-
-%\color{SaddleBrown} % SaddleBrown color for the introduction
-%
-%\section*{Introduction}
-%
-%Aliquam non lacus dolor, \textit{a aliquam quam} \cite{Smith:2012qr}. Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Nulla in nibh mauris. Donec vel ligula nisi, a lacinia arcu. Sed mi dui, malesuada vel consectetur et, egestas porta nisi. Sed eleifend pharetra dolor, et dapibus est vulputate eu. \textbf{Integer faucibus elementum felis vitae fringilla.} In hac habitasse platea dictumst. Duis tristique rutrum nisl, nec vulputate elit porta ut. Donec sodales sollicitudin turpis sed convallis. Etiam mauris ligula, blandit adipiscing condimentum eu, dapibus pellentesque risus.
-%
-%\textit{Aliquam auctor}, metus id ultrices porta, risus enim cursus sapien, quis iaculis sapien tortor sed odio. Mauris ante orci, euismod vitae tincidunt eu, porta ut neque. Aenean sapien est, viverra vel lacinia nec, venenatis eu nulla. Maecenas ut nunc nibh, et tempus libero. Aenean vitae risus ante. Pellentesque condimentum dui. Etiam sagittis purus non tellus tempor volutpat. Donec et dui non massa tristique adipiscing.
-%
-%----------------------------------------------------------------------------------------
-%	OBJECTIVES
-%----------------------------------------------------------------------------------------
+\color{DarkSlateGray}
+Typical Control plane architecture in SDN involves multiple peer controllers, managing subset of network, but keeping a global view of the network.
 
 \color{SaddleBrown}% DarkSlateGray color for the rest of the content
-\section*{PROBLEM}
+\section*{PROBLEMS}
 \color{DarkSlateGray}
-\begin{tabular} {l | l}
-    \textbf{Single Controller Architecture} & \textbf{Distributed controller Architecture} \\
-    \hline
-    Responsiveness & Communication overhead \\
-       Scalability & Scalability of global network view \\
-       Reliability & Network state inconsistencies \\
-                   & Management barriers across networks
-\end{tabular}
 
-\textbf{Trade-offs}
 \begin{itemize}
-    \item Consistency vs. Responsiveness
-    \item Optimality vs. I dont know what
-    \item Application design complexity (Architecture aware vs. agnostic)\\
+    \item Replication of entire network state requires huge communication overhead: hinders scalability of the system
+    \item Network inconsistency degrades the performance of control application
+    \item Scalability of global network view itself
 \end{itemize}
 
-\textbf{Goals}
-\begin{itemize}
-    \item Make control applications agnostic to architecture
-    \item Reduce communication overhead
-    \item Minimize network state inconsistencies
-    \item Enable smooth transition across management barriers
-    \item Handle changes locally \\
-\end{itemize}
-
-\textbf{Price we pay}
-\begin{itemize}
-    \item Solution not always optimal
-\end{itemize}
 
 \color{SaddleBrown}
 \section*{PROPOSED SOLUTION}
 \color{DarkSlateGray}
+
+\textbf{Switch Abstraction}
 \begin{itemize}
-    \item Hierarchical arrangement of controllers
-    \item One switch abstraction
-    \item Translate messages across hierarchical layers
+    \item A controller creates an abstract switch representing the underlying managed network.
+    \item A controller exposes "OpenFlow" API to manage the abstract switch by other (parent) controller.
+    \item OpenFlow messages are translated between parent controller and underlying network. \\
+\end{itemize}
+
+\textbf{Hierarchical arrangement}
+\begin{itemize}
+    \item Controllers are arranged in a tree structure over the network using switch abstraction.
+    \item Controllers do not keep a global view of network, but only the part which they control.
+    \item Local application and network events are shielded from upper layer controllers.
 \end{itemize}
 
 \begin{figure}[H]
@@ -151,12 +116,18 @@
 \end{figure}
 
 
+\textbf{Pros} 
+Reduce replication overhead; Eliminate network inconsistency; Enable smooth transition across management barriers \\ \\
+\textbf{Price we pay}  \\
+Sub-optimality for inter-domain operations. How much is the deviation from optimality ?
+
+
 %------------------------------------------------
 
 
 
 
-%Gourav - I'm starting from here ownwards: 
+%Gourav - I'm starting from here onwards: 
 %----------------------------------------------------------------------------------------
 %	RESULTS 
 %----------------------------------------------------------------------------------------
@@ -167,7 +138,7 @@
 %\item We simulated a dummy control application on both hierarchical and flat controller architectures, with same network topology and flow arrival distribution.
 \item Flow data (6000 MapReduce jobs) was generated by sampling historical Hadoop traces on a 600 machine cluster at Facebook (1 million jobs). A dummy MapReduce application choses directory, map and reduce nodes randomly for each job.
 \item Topology: 600 hosts connected through a network of 200 switches and 10 Gbps links. The cluster is divided into 10 equally-sized control domains.
-\item TE-cum-routing coutrol application: When a new flow arrives, it finds the path with minimum maximum utilization. If multiple such paths exist (which is frequently the case, due to a large network), shortest path (in term of number of hops) is chosen.
+\item TE-cum-routing control application: When a new flow arrives, it finds the path with minimum maximum utilization. If multiple such paths exist (which is frequently the case, due to a large network), shortest path (in term of number of hops) is chosen.
 \end{itemize}
 
 \color{SaddleBrown}
@@ -176,7 +147,7 @@
 \begin{itemize}
 \item Path length (number of hops) of the routes assigned to flows.
 \item Maximum link utilization of the path assigned to flows.
-\item Communication overhead (number of messages exchanged between controllers) for seting up routes for flows.   
+\item Communication overhead (number of messages exchanged between controllers) for setting up routes for flows.   
 \end{itemize}
 
 
@@ -215,7 +186,7 @@
 \color{SaddleBrown}
 \section*{RESULTS}
 \color{DarkSlateGray}
-Hierarchical architecture reduces communication overhead (Figure \ref{fig:msg}) by an order of magnitude while comprimising modestly on optimality: shortest path length (17.4\%) (Figure \ref{fig:path}) and minimum maximum link utilization (12.8\%) (Figure \ref{fig:util}).
+Hierarchical architecture reduces communication overhead (Figure \ref{fig:msg}) by an order of magnitude while compromising modestly on optimality: shortest path length (17.4\%) (Figure \ref{fig:path}) and minimum maximum link utilization (12.8\%) (Figure \ref{fig:util}).
 
 %----------------------------------------------------------------------------------------
 %	CONCLUSIONS
@@ -242,8 +213,8 @@ Hierarchical architecture reduces communication overhead (Figure \ref{fig:msg}) 
 \color{SaddleBrown}
 \section*{RESOURCES}
 \color{DarkSlateGray}
-\section*{Source Code}
-https://github.com/MugiwaraLuffy/ACN/
+https://github.com/MugiwaraLuffy/ACN/ \\
+https://github.com/SWIMProjectUCB/SWIM
 \nocite{*} % Print all references regardless of whether they were cited in the poster or not
 %\bibliographystyle{plain} % Plain referencing style
 \bibliography{sample} % Use the example bibliography file sample.bib
