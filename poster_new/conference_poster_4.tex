@@ -18,7 +18,7 @@
 %	PACKAGES AND OTHER DOCUMENT CONFIGURATIONS
 %----------------------------------------------------------------------------------------
 
-\documentclass[portrait,a1paper,fontscale=0.45]{baposter} % Adjust the font scale/size here
+\documentclass[portrait,a1paper,fontscale=0.4]{baposter} % Adjust the font scale/size here
 
 \usepackage{graphicx} % Required for including images
 \graphicspath{{figures/}} % Directory in which figures are stored
@@ -80,7 +80,7 @@ linewidth=2pt % Width of the border lines around content boxes
 {\includegraphics[height=4em]{logo.png}} % First university/lab logo on the left
 {\bf\textsc{Hierarchical Controller Architecture in Software Defined Networks}\vspace{0.5em}} % Poster title
 {\textsc{\{ Gourav Khaneja, Sweta Seethamraju \& Praveen Kumar \} \hspace{12pt}}} % Author names and institution
-{\hspace{120pt} \includegraphics[height=8em]{UIUC_logo.png}} % Second university/lab logo on the right
+{\hspace{40pt} \includegraphics[height=8em]{UIUC_logo.png}} % Second university/lab logo on the right
 
 %----------------------------------------------------------------------------------------
 %	OBJECTIVES
@@ -153,25 +153,25 @@ Sub-optimality for inter-domain operations. How much is the deviation from optim
 \item Maximum link utilization of the path assigned to flows.
 \item Communication overhead (number of messages exchanged between controllers) for setting up routes for flows.   
 \end{itemize}
-\begin{multicols}{3}
+
 \begin{center}
 \includegraphics[scale=0.3]{msg}
 \captionof{figure}{Per flow communication overhead}
 \label{fig:msg}
 \end{center}
 
-
-\begin{minipage}{.3\textwidth}
+\begin{multicols}{2}
+\begin{minipage}{.5\textwidth}
 \begin{center}
-\includegraphics[scale=0.3]{path.png}
+\includegraphics[scale=0.2]{path.png}
 \captionof{figure}{Path length}
 \label{fig:path}
 \end{center}
 \end{minipage}
 
-\begin{minipage}{.3\textwidth}
+\begin{minipage}{.5\textwidth}
 \begin{center}
-\includegraphics[scale=0.3]{util.png}
+\includegraphics[scale=0.2]{util.png}
 \captionof{figure}{Maximum link utilization}
 \label{fig:util}
 \end{center}

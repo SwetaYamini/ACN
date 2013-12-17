@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.1415926-2.4-1.40.13 (MiKTeX 2.9) (preloaded format=pdflatex 2013.3.3)  17 DEC 2013 23:50
+This is pdfTeX, Version 3.1415926-2.4-1.40.13 (MiKTeX 2.9) (preloaded format=pdflatex 2013.3.3)  17 DEC 2013 23:54
 entering extended mode
 **C:/Users/IBM_ADMIN/Downloads/ACN/ACN/poster_new/conference_poster_4.tex
 (C:/Users/IBM_ADMIN/Downloads/ACN/ACN/poster_new/conference_poster_4.tex
@@ -455,8 +455,8 @@ File: tikzlibrarycalc.code.tex 2009/09/04 v2.10 (rcs-revision 1.6)
 
 Paperwidth=1690.09369pt
 Paperheight=2392.87677pt
-BasePaperwidth=760.53699pt
-BasePaperheight=1076.78723pt
+BasePaperwidth=676.02715pt
+BasePaperheight=957.1361pt
 ("C:\Program Files (x86)\MiKTeX 2.9\tex\latex\geometry\geometry.sty"
 Package: geometry 2010/09/12 v5.6 Page Geometry
 
@@ -738,15 +738,15 @@ File: t1ppl.fd 2001/06/04 font definitions for T1/ppl.
 * layout: <same size as paper>
 * layoutoffset:(h,v)=(0.0pt,0.0pt)
 * modes: 
-* h-part:(L,W,R)=(19.20547pt, 722.12604pt, 19.20547pt)
-* v-part:(T,H,B)=(19.20547pt, 1038.37628pt, 19.20547pt)
-* \paperwidth=760.53699pt
-* \paperheight=1076.78723pt
-* \textwidth=722.12604pt
-* \textheight=1038.37628pt
-* \oddsidemargin=-53.06451pt
-* \evensidemargin=-53.06451pt
-* \topmargin=-90.06451pt
+* h-part:(L,W,R)=(17.07138pt, 641.88438pt, 17.07138pt)
+* v-part:(T,H,B)=(17.07138pt, 922.99333pt, 17.07138pt)
+* \paperwidth=676.02715pt
+* \paperheight=957.1361pt
+* \textwidth=641.88438pt
+* \textheight=922.99333pt
+* \oddsidemargin=-55.19861pt
+* \evensidemargin=-55.19861pt
+* \topmargin=-92.19861pt
 * \headheight=12.0pt
 * \headsep=25.0pt
 * \topskip=10.0pt
@@ -822,38 +822,38 @@ LaTeX Font Info:    Font shape `T1/ppl/bx/n' in size <9> not available
 Missing character: There is no ; in font nullfont!
 Missing character: There is no ; in font nullfont!
 Missing character: There is no ; in font nullfont!
-Missing character: There is no ; in font nullfont!
-Missing character: There is no ; in font nullfont!
-Missing character: There is no ; in font nullfont!
- <figures/msg.png, id=24, 642.4pt x 481.8pt>
-File: figures/msg.png Graphic file (type png)
 
-<use figures/msg.png>
+Underfull \hbox (badness 1275) in paragraph at lines 148--148
+[]\T1/ppl/m/n/10 Topology: 600 hosts con-nected through a net-work of 200
+ []
+
+Missing character: There is no ; in font nullfont!
+Missing character: There is no ; in font nullfont!
+Missing character: There is no ; in font nullfont!
+<figures/msg.png, id=24, 642.4pt x 481.8pt>
+File: figures/msg.png Graphic file (type png)
+ <use figures/msg.png>
 Package pdftex.def Info: figures/msg.png used on input line 182.
 (pdftex.def)             Requested size: 192.72148pt x 144.5411pt.
-
-Overfull \hbox (87.3647pt too wide) in paragraph at lines 182--182
- [] 
- []
 
 <figures/path.png, id=25, 642.4pt x 481.8pt>
 File: figures/path.png Graphic file (type png)
  <use figures/path.png>
 Package pdftex.def Info: figures/path.png used on input line 182.
-(pdftex.def)             Requested size: 192.72148pt x 144.5411pt.
+(pdftex.def)             Requested size: 128.47772pt x 96.35829pt.
 
-Overfull \hbox (88.90152pt too wide) in paragraph at lines 182--182
- [] 
+Overfull \hbox (7.49817pt too wide) in paragraph at lines 182--182
+[]$[]$ 
  []
 
 <figures/util.png, id=26, 642.4pt x 481.8pt>
 File: figures/util.png Graphic file (type png)
  <use figures/util.png>
 Package pdftex.def Info: figures/util.png used on input line 182.
-(pdftex.def)             Requested size: 192.72148pt x 144.5411pt.
+(pdftex.def)             Requested size: 128.47772pt x 96.35829pt.
 
-Overfull \hbox (88.90152pt too wide) in paragraph at lines 182--182
- [] 
+Overfull \hbox (7.49817pt too wide) in paragraph at lines 182--182
+[]$[]$ 
  []
 
 Missing character: There is no ; in font nullfont!
@@ -875,12 +875,12 @@ res/path.png> <C:/Users/IBM_ADMIN/Downloads/ACN/ACN/poster_new/figures/util.png
 >] (C:\Users\IBM_ADMIN\Downloads\ACN\ACN\poster_new\conference_poster_4.aux) ) 
 Here is how much of TeX's memory you used:
  14845 strings out of 493921
- 285597 string characters out of 3144865
- 347914 words of memory out of 3000000
+ 285598 string characters out of 3144865
+ 347924 words of memory out of 3000000
  17821 multiletter control sequences out of 15000+200000
  23953 words of font info for 44 fonts, out of 3000000 for 9000
  841 hyphenation exceptions out of 8191
- 63i,13n,92p,479b,1002s stack positions out of 5000i,500n,10000p,200000b,50000s
+ 63i,13n,92p,479b,990s stack positions out of 5000i,500n,10000p,200000b,50000s
 {
 C:/Program Files (x86)/MiKTeX 2.9/fonts/enc/dvips/fontname/8r.enc}<C:/Program F
 iles (x86)/MiKTeX 2.9/fonts/type1/public/amsfonts/cm/cmmi12.pfb><C:/Program Fil
@@ -888,7 +888,7 @@ es (x86)/MiKTeX 2.9/fonts/type1/public/amsfonts/cm/cmsy10.pfb><C:/Program Files
  (x86)/MiKTeX 2.9/fonts/type1/public/amsfonts/cm/cmti12.pfb><C:/Program Files (
 x86)/MiKTeX 2.9/fonts/type1/urw/palatino/uplb8a.pfb><C:/Program Files (x86)/MiK
 TeX 2.9/fonts/type1/urw/palatino/uplr8a.pfb>
-Output written on conference_poster_4.pdf (1 page, 144088 bytes).
+Output written on conference_poster_4.pdf (1 page, 144078 bytes).
 PDF statistics:
  63 PDF objects out of 1000 (max. 8388607)
  0 named destinations out of 1000 (max. 500000)
