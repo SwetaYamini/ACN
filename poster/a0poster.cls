@@ -1,21 +1,21 @@
-%$Id: a0poster.cls,v 1.5 1999/04/05 14:49:56 mjf Exp $
 %% 
 %% This is file `a0poster.cls'
 %% 
-%% Copyright (C) 07.05.97 Gerlinde Kettl and Matthias Weiser
+%% Copyright (C) 1997-2004 Gerlinde Kettl and Matthias Weiser
+%%
+%% It may be distributed and/or modified under the
+%% conditions of the LaTeX Project Public License, either version 1.2
+%% of this license or (at your option) any later version.
+%% The latest version of this license is in
+%% http://www.latex-project.org/lppl.txt
+%% and version 1.2 or later is part of all distributions of LaTeX
+%% version 1999/12/01 or later.
 %%
 %% Problems, bugs and comments to 
-%% gerlinde.kettl@physik.uni-regensburg.de
+%% tex@kettl.de
 %% 
-%% changed textwidths and margins to cope with printable area and
-%% frame.  Make sure that the offsets are set to -1in!
-%% Also changed scaling for a0->a4, since this was wrong.
 
-%% This version changed by Hugh Pumphrey on 4.5.1999. Every instance
-%% of the string ``draft'' replaced by the string ``preview''. This gives 
-%% an a4 size preview but includes the postscript figures
-
-\ProvidesClass{a0poster}[1997/05/07 v1.21b a0poster class (GK, MW)]
+\ProvidesClass{a0poster}[2004/01/31 v1.22b a0poster class (GK, MW)]
 \NeedsTeXFormat{LaTeX2e}[1995/06/01]
 \LoadClass{article}
 
@@ -25,7 +25,7 @@
 \newif\ifaeins
 \newif\ifazwei
 \newif\ifadrei
-\newif\ifpreview
+\newif\ifposterdraft
 
 \newcount\xkoord
 \newcount\ykoord
@@ -34,17 +34,17 @@
 
 \DeclareOption{a0b}{
 \anullbtrue
-\xkoord=2592 % big points (1 bp=1/72 inch)
-\ykoord=3666 % big points (1 bp=1/72 inch)
-\xscale=23
-\yscale=23
+\xkoord=2594 % big points (1 bp=1/72 inch)
+\ykoord=3370 % big points (1 bp=1/72 inch)
+\xscale=2
+\yscale=2
 }
 \DeclareOption{a0}{
 \anulltrue\anullbfalse
 \xkoord=2380 % big points (1 bp=1/72 inch)
 \ykoord=3368 % big points (1 bp=1/72 inch)
-\xscale=25
-\yscale=25
+\xscale=2
+\yscale=2
 }
 \DeclareOption{a1}{
 \aeinstrue\anullbfalse
@@ -74,26 +74,29 @@
 \DeclareOption{portrait}{
 \portraittrue
 }
-\DeclareOption{preview}{
-\previewtrue
+\DeclareOption{draft}{   %% Just for downward compatibility
+\posterdrafttrue
+}
+\DeclareOption{posterdraft}{ %% To avoid collisions with the graphics package
+\posterdrafttrue
 }
 \DeclareOption{final}{
-\previewfalse
+\posterdraftfalse
 }
 \DeclareOption*{\PackageWarning{a0poster}{Unknown Option \CurrentOption}}
 \ExecuteOptions{landscape,a0b,final}
 \ProcessOptions\relax
 
 \ifanullb
-   \setlength{\paperwidth}{129.3cm} %% 36 * sqrt(2) in
-   \setlength{\paperheight}{91.4cm} %% 36 in
-   \setlength{\textwidth}{119.3cm} %% paperwidth - (5cm + 5cm)
-   \setlength{\textheight}{81.4cm} %% paperheight - (5cm + 5cm)
+   \setlength{\paperwidth}{119cm}
+   \setlength{\paperheight}{87cm}
+   \setlength{\textwidth}{114cm}
+   \setlength{\textheight}{87cm}
 \else\ifanull
         \setlength{\paperwidth}{118.82cm}
         \setlength{\paperheight}{83.96cm}
-        \setlength{\textwidth}{108.82cm} %% paperwidth - (5cm + 5cm)
-        \setlength{\textheight}{73.96cm} %% paperheight - (5cm + 5cm)
+        \setlength{\textwidth}{114.82cm}
+        \setlength{\textheight}{79.96cm}
      \else\ifaeins
              \setlength{\paperwidth}{83.96cm}
              \setlength{\paperheight}{59.4cm}
@@ -128,24 +131,27 @@
 \else\relax
 \fi
 
-%% Setting proper dimensions for the HP2500CP printer (height = 36 in)
-%%   Landscape: unprintable areas
-%%   	L: 27.6mm
-%%   	R: 27.1mm
-%%   	T: 18.4mm
-%%   	B: 18.1mm
-
-
-\voffset -1in
-\hoffset -1in
+%% Setting proper dimensions for a DIN A0 printer
 
 \setlength{\headheight}{0 cm}
 \setlength{\headsep}{0 cm}
-\setlength{\topmargin}{5 cm} %% 3 cm for unprintable at top
-			     %% (landscape) + 2 cm from border
-\setlength{\oddsidemargin}{5 cm} %% 3 cm for unprintable at left
-			    	 %% (landscape) + 2 cm from border
-\setlength{\topskip}{0 cm}
+\setlength{\topmargin}{0 cm}
+\setlength{\oddsidemargin}{0 cm}
+
+\catcode`\%=11
+\newwrite\Ausgabe
+\immediate\openout\Ausgabe=a0header.ps
+\write\Ausgabe{%%BeginFeature *PageSize ISOA0/ISO A0}
+\ifposterdraft\write\Ausgabe{2 dict dup /PageSize [595 842] put dup /ImagingBBox null put}
+\else\write\Ausgabe{2 dict dup /PageSize [\number\xkoord\space \number\ykoord] put dup /ImagingBBox null put}\fi
+\write\Ausgabe{setpagedevice}
+\ifposterdraft\write\Ausgabe{38 84 translate}
+\write\Ausgabe{0.\number\xscale\space 0.\number\yscale\space scale}\else\relax\fi
+\write\Ausgabe{%%EndFeature}
+\closeout\Ausgabe
+\catcode`\%=14
+
+\special{header=./a0header.ps}
 
 \input{a0size.sty}
 
@@ -178,7 +184,7 @@
 
 \AtBeginDocument{
 \ifanullb
-   \ifportrait\special{papersize=91.4cm,129.3cm}\else\special{papersize=129.3cm,91.4cm}\fi
+   \ifportrait\special{papersize=91.51cm,120cm}\else\special{papersize=120cm,91.51cm}\fi
 \else\ifanull
         \ifportrait\special{papersize=83.96cm,118.82cm}\else\special{papersize=118.82cm,83.96cm}\fi
      \else\ifaeins
@@ -186,7 +192,7 @@
           \else\ifazwei
                   \ifportrait\special{papersize=41.98cm,59.4cm}\else\special{papersize=59.4cm,41.98cm}\fi
                \else\ifadrei
-                      \ifpreview
+                      \ifposterdraft
                        \ifportrait\special{papersize=29.7cm,41.35cm}\else\special{papersize=41.98cm,29.0cm}\fi
                       \else
                        \ifportrait\special{papersize=29.7cm,41.98cm}\else\special{papersize=41.98cm,29.7cm}\fi

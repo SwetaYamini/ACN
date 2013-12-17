@@ -18,7 +18,7 @@
 %	PACKAGES AND OTHER DOCUMENT CONFIGURATIONS
 %----------------------------------------------------------------------------------------
 
-\documentclass[a0,portrait]{a0poster}
+\documentclass[portrait,a1]{a0poster}
 
 \usepackage{multicol} % This is so we can have multiple columns of text side-by-side
 \columnsep=100pt % This is the amount of white space between the columns in the poster
@@ -26,7 +26,7 @@
 
 \usepackage[svgnames]{xcolor} % Specify colors by their 'svgnames', for a full list of all colors available see here: http://www.latextemplates.com/svgnames-colors
 
-\usepackage{times} % Use the times font
+%x\usepackage{times} % Use the times font
 \usepackage{palatino} % Uncomment to use the Palatino font
 
 \usepackage{graphicx} % Required for including images
@@ -51,18 +51,15 @@
 % The widths of these boxes can be easily edited to accommodate your content as you see fit
 
 \begin{minipage}[b]{0.75\linewidth}
-\veryHuge \color{NavyBlue} \textbf{Hierarchical Controller Architecture} \color{Black}\\ % Title
+\Huge \color{NavyBlue} \textbf{Hierarchical Controller Architecture} \color{Black}\\ % Title
 \Huge\color{NavyBlue}\text{in Software Defined Networks}\\[1cm] % Subtitle
-\huge \textbf{Author1 \& Author2}\\[0.5cm] % Author(s)
+\Large \textbf{Author1 \& Author2}\\[0.5cm] % Author(s)
 %\huge University and Department Name\\[0.4cm] % University/organization
 %\Large \texttt{john@LaTeXTemplates.com} --- 1 (000) 111 1111\\
 \end{minipage}
 %
-\begin{minipage}[b]{0.25\linewidth}
-\includegraphics[width=20cm]{logo.png}\\
-\end{minipage}
 
-\vspace{1cm} % A bit of extra whitespace between the header and poster content
+\vspace{-1cm} % A bit of extra whitespace between the header and poster content
 
 %----------------------------------------------------------------------------------------
 
@@ -140,7 +137,7 @@
 
 \begin{figure}[H]
 \centering
-\includegraphics[scale=2]{hierarchy}
+\includegraphics[scale=1.9]{hierarchy}
 \caption{Hierarchical arrangement of controllers}
 \label{fig:hierarchy}
 \end{figure}
@@ -183,7 +180,7 @@
 %\end{center}\vspace{1cm}
 \begin{figure}[H]
 \centering
-\includegraphics[scale=1]{msg}
+\includegraphics[scale=01]{msg}
 \caption{Per flow communication overhead}
 \label{fig:msg}
 \end{figure}
@@ -201,8 +198,8 @@
 
 \begin{figure}[H]
   \begin{center}  
-    \subfigure[Path length]{\label{fig:path}\includegraphics[scale=0.75]{path.png}} 
-    \subfigure[Maximum link utilization]{\label{fig:util}\includegraphics[scale=0.75]{util.png}} 
+    \subfigure[Path length]{\label{fig:path}\includegraphics[scale=0.55]{path.png}} 
+    \subfigure[Maximum link utilization]{\label{fig:util}\includegraphics[scale=0.55]{util.png}} 
   \end{center}
 \caption{Application performance}
 \end{figure}
@@ -229,17 +226,18 @@ Hierarchical architecture reduces communication overhead (Figure \ref{fig:msg}) 
 
 %\section*{Forthcoming Research}
 
-\color{SaddleBrown}
-\subsection*{SOURCE CODE}
-\color{DarkSlateGray}
-https://github.com/MugiwaraLuffy/ACN/
+
 
  %----------------------------------------------------------------------------------------
 %	REFERENCES
 %----------------------------------------------------------------------------------------
-
+\color{SaddleBrown}
+\section*{RESOURCES}
+\color{DarkSlateGray}
+\section*{Source Code}
+https://github.com/MugiwaraLuffy/ACN/
 \nocite{*} % Print all references regardless of whether they were cited in the poster or not
-\bibliographystyle{plain} % Plain referencing style
+%\bibliographystyle{plain} % Plain referencing style
 \bibliography{sample} % Use the example bibliography file sample.bib
 
 %----------------------------------------------------------------------------------------
