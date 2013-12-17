@@ -18,7 +18,7 @@
 %	PACKAGES AND OTHER DOCUMENT CONFIGURATIONS
 %----------------------------------------------------------------------------------------
 
-\documentclass[portrait,a1paper,fontscale=0.5]{baposter} % Adjust the font scale/size here
+\documentclass[portrait,a1paper,fontscale=0.45]{baposter} % Adjust the font scale/size here
 
 \usepackage{graphicx} % Required for including images
 \graphicspath{{figures/}} % Directory in which figures are stored
@@ -147,13 +147,13 @@ Sub-optimality for inter-domain operations. How much is the deviation from optim
 \end{itemize}
 }
 
-\headerbox{METRICS}{name=metrics,column=1,span=2,row=2,below=solution}{
+\headerbox{METRICS}{name=metrics,column=0,span=3,row=2,below=solution}{
 \begin{itemize}
 \item Path length (number of hops) of the routes assigned to flows.
 \item Maximum link utilization of the path assigned to flows.
 \item Communication overhead (number of messages exchanged between controllers) for setting up routes for flows.   
 \end{itemize}
-
+\begin{multicols}{3}
 \begin{center}
 \includegraphics[scale=0.3]{msg}
 \captionof{figure}{Per flow communication overhead}
@@ -161,7 +161,7 @@ Sub-optimality for inter-domain operations. How much is the deviation from optim
 \end{center}
 
 
-\begin{minipage}{.5\textwidth}
+\begin{minipage}{.3\textwidth}
 \begin{center}
 \includegraphics[scale=0.3]{path.png}
 \captionof{figure}{Path length}
@@ -169,24 +169,25 @@ Sub-optimality for inter-domain operations. How much is the deviation from optim
 \end{center}
 \end{minipage}
 
-\begin{minipage}{.5\textwidth}
+\begin{minipage}{.3\textwidth}
 \begin{center}
 \includegraphics[scale=0.3]{util.png}
 \captionof{figure}{Maximum link utilization}
 \label{fig:util}
 \end{center}
 \end{minipage}
+\end{multicols}
 
 
 }
 
-\headerbox{RESULTS}{name=results,column=0,row=3,below=exp}{
+\headerbox{RESULTS}{name=results,column=0,span=2,row=3,below=metrics}{
 
 Hierarchical architecture reduces communication overhead (Figure \ref{fig:msg}) by an order of magnitude while compromising modestly on optimality: shortest path length (17.4\%) (Figure \ref{fig:path}) and minimum maximum link utilization (12.8\%) (Figure \ref{fig:util}).
 }
 
 
-\headerbox{RESOURCES}{name=resources,column=0,span=1,row=3,below=results}{
+\headerbox{RESOURCES}{name=resources,column=2,span=1,row=3,below=metrics}{
 
 https://github.com/MugiwaraLuffy/ACN/ \\
 https://github.com/SWIMProjectUCB/SWIM
