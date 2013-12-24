@@ -12,7 +12,8 @@ public class FlowLink {
 	}
 	
 	public String toString(){
-		String ret = "" +link;
+		int cid = Network.links.get(link).controller;
+		String ret = "" +link+"(" + cid + ")";
 		return ret;
 	}
 	

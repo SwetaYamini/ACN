@@ -43,8 +43,8 @@ public class Simulator {
 		int flowid=0;
 		for(int i=1;i<simulationLife; i++){
 			flowsAtInstant.clear();
-			if(rand.nextBoolean()) flowsAtInstant.add(new Flow(flowid, 10, 11, i, 10, 5));
-			else flowsAtInstant.add(new Flow(flowid, 11, 10, i, 10, 5));
+			if(rand.nextBoolean()) flowsAtInstant.add(new Flow(flowid, 10007, 11007, i, 10, 5));
+			else flowsAtInstant.add(new Flow(flowid, 11007, 10007, i, 10, 5));
 			flows.put(i, new ArrayList<Flow>(flowsAtInstant));
 			flowid++;
 		}
@@ -103,9 +103,13 @@ public class Simulator {
 				ArrayList<Flow> todaysFlow = flows.get(time);
 				for(int i=0;i<todaysFlow.size();i++){
 					//System.out.println("Adding flow : " + todaysFlow.get(i));
-					Controller controller = Network.controllers.get(Network.switches.get(todaysFlow.get(i).srcSwitch).controller);
+					//System.out.println(todaysFlow.get(i).srcPort);
+					//System.out.println(Network.ports.keySet());
+					int sw = Network.ports.get(todaysFlow.get(i).srcPort).parent;
+					Controller controller = Network.controllers.get(Network.switches.get(sw).controller);
 					if(controller.addFlow(todaysFlow.get(i))){
 						//todaysFlow.get(i).printTimestamp();
+						controller.startFlow(todaysFlow.get(i), 0);
 						activeFlows.add(todaysFlow.get(i));
 					}
 					
@@ -149,6 +153,7 @@ public class Simulator {
 	
 	public void removeFlow(Flow flow){
 		HashMap<Integer, Integer> updatedControllers = new HashMap<Integer, Integer>(); 
+		//System.out.println("Removing flow " + flow.id + " " + flow);
 		for(int i=0;i<flow.path.size();i++){
 			int link = flow.path.get(i).link;
 			int controller = Network.links.get(link).controller;

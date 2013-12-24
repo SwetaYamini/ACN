@@ -77,7 +77,7 @@ public class Simulator {
 				controller = new Controller2(cid);
 			}
 			int neighborCount = Math.abs(ndomains/2-i) + 1;
-			if(neighborCount > 4) neighborCount=4;
+			if(neighborCount > 3) neighborCount=3;
 			intraNeighbors.put(cid, neighborCount);
 			ArrayList<Switch> switches = new ArrayList<Switch>();
 			for(int j=1;j <=nswitches; j++){

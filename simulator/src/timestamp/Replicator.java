@@ -66,4 +66,16 @@ public class Replicator extends Thread {
 				it.next().replicateUtilizations();
 			}
 		}
+
+		public static int getMaxUtilization() {
+			Iterator<Integer> it = utilizations.keySet().iterator();
+			int max=0;
+			while(it.hasNext()){
+				Utilization util = utilizations.get(it.next());
+				if(max < util.utilization){
+					max = util.utilization;
+				}
+			}
+			return max;
+		}
 }

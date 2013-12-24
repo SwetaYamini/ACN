@@ -10,6 +10,7 @@ public class Network {
 	public static HashMap<Integer, Link> links;
 	public static HashMap<Integer, Port> ports;
 	public static HashMap<Integer, Controller> controllers;
+	public static HashMap<Integer, Host> hosts;
 	
 	public static int NSWITCHES;
 	public static int NLINKS; 
@@ -20,6 +21,7 @@ public class Network {
 		links = new HashMap<Integer, Link>();
 		ports = new HashMap<Integer, Port>();
 		controllers = new HashMap<Integer, Controller>();
+		hosts = new HashMap<Integer, Host>();
 	}
 	
 	public static void createRealRandomNetwork(){
@@ -187,4 +189,5 @@ public class Network {
 			System.out.println(it2.next());
 		}
 	}
+	
 }

@@ -4,8 +4,8 @@ import java.util.ArrayList;
 
 public class Flow {
 	int id;
-	int srcSwitch;
-	int dstSwitch;
+	int srcPort;
+	int dstPort;
 	int startTime;
 	int duration;
 	int active;
@@ -13,11 +13,12 @@ public class Flow {
 	int[] timestamp;
 	ArrayList<FlowLink> path;
 	int currPosition;
+	int removable=1;
 	
-	public Flow(int id, int srcSwitch, int dstSwitch, int startTime, int duration, int rate){
+	public Flow(int id, int srcPort, int dstPort, int startTime, int duration, int rate){
 		this.id = id;
-		this.srcSwitch = srcSwitch;
-		this.dstSwitch = dstSwitch;
+		this.srcPort = srcPort;
+		this.dstPort = dstPort;
 		this.startTime = startTime;
 		this.duration = duration;
 		this.rate = rate;
@@ -47,7 +48,7 @@ public class Flow {
 	}
 	
 	public String toString(){
-		String ret = "Flow["+id+"][sw "+srcSwitch+"-"+dstSwitch+"]["+startTime+"-"+(startTime+duration)+"]";
+		String ret = "Flow["+id+"][port "+srcPort+"-"+dstPort+"]["+startTime+"-"+(startTime+duration)+"]";
 		if(path!=null) ret+=path;
 		return ret;
 	}
